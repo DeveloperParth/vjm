@@ -2,6 +2,6 @@
 .env
 
 /uploads/*
-!/uploads/temp/.gitkeep
+!/uploads/temp/
 
 creds.json
