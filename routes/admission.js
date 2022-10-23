@@ -2,12 +2,13 @@ const router = require("express").Router();
 const upload = require("../middlewares/Upload");
 const BaseError = require("../utils/BaseError");
 const connection = require("./../config/db");
-const checkAdmin = require("./../middlewares/checkAdmin");
+const checkStaff = require("./../middlewares/checkStaff");
 const fs = require("fs");
 const { models } = require("../config/db");
 
 router.post(
   "/ug",
+  checkStaff,
   upload.fields([
     { name: "photo", maxCount: 1 },
     { name: "lc", maxCount: 1 },
@@ -19,14 +20,18 @@ router.post(
   ]),
   async (req, res, next) => {
     try {
+      console.log(req.body);
       const {
         name,
         surname,
         semester,
         stream,
+        year,
         father_name,
         mother_name,
         address,
+        taluka,
+        district,
         city,
         pincode,
         state,
@@ -36,6 +41,7 @@ router.post(
         dob,
         gender,
         birth_place,
+        disease,
         physical_disability,
         category,
         minority,
@@ -47,7 +53,7 @@ router.post(
 
         hsc_stream,
         hsc_seat,
-        hsc_year,
+        hsc_passing_year,
         hsc_month,
         hsc_attempt,
         hsc_total,
@@ -57,7 +63,8 @@ router.post(
         hsc_grade,
         hsc_board,
         hsc_center,
-        hsc_school,
+        hsc_school_name,
+        hsc_school_number,
       } = req.body;
       const isRequestValid = validateRequest(req);
       if (!isRequestValid) {
@@ -69,9 +76,12 @@ router.post(
         surname,
         semester,
         stream,
+        year,
         father_name,
         mother_name,
         address,
+        taluka,
+        district,
         city,
         pincode,
         state,
@@ -81,6 +91,7 @@ router.post(
         dob: Date(dob),
         gender,
         birth_place,
+        disease,
         physical_disability,
         category,
         minority,
@@ -91,7 +102,7 @@ router.post(
         email,
         hsc_stream,
         hsc_seat,
-        hsc_year,
+        hsc_year: hsc_passing_year,
         hsc_month,
         hsc_attempt,
         hsc_total,
@@ -101,7 +112,8 @@ router.post(
         hsc_grade,
         hsc_board,
         hsc_center,
-        hsc_school,
+        hsc_school_name,
+        hsc_school_number,
       });
       handleFiles(req, response.id);
 
@@ -114,39 +126,45 @@ router.post(
 
 router.get("/ug", async (req, res, next) => {
   try {
-    const data = await models.ug.findAll({
-      // include: "ugPhotos",
-      // group: "ugPhotos.type",
-    });
+    const data = await models.ug.findAll({});
     res.status(200).json({ data });
   } catch (error) {
     next(error);
   }
 });
-router.get("/ug/:id", async (req, res, next) => {
+router.get("/ug/:id", checkStaff, async (req, res, next) => {
   try {
-    const { dataValues: data } = await models.ug.findByPk(req.params.id, {
+    const response = await models.ug.findByPk(req.params.id, {
       include: [{ model: models.ugPhotos }],
+      paranoid: false,
     });
-    const obj = {};
-    console.log(data);
+    if (!response) throw new BaseError(404, "Not found");
+    if (response.isSoftDeleted && res.locals.user.role === "STAFF")
+      throw new BaseError(403, "Unauthorized");
+    const data = response.dataValues;
+    const photos = {};
     data.ugPhotos.map((photo) => {
-      if (obj[photo.type]) {
-        obj[photo.type].push(photo);
+      if (photos[photo.type]) {
+        photos[photo.type].push(photo);
       } else {
-        obj[photo.type] = [photo];
+        photos[photo.type] = [photo];
       }
     });
     delete data.ugPhotos;
-    res.status(200).json({ data: { ...data, photos: obj } });
+    res.status(200).json({ data: { ...data, photos } });
   } catch (error) {
     next(error);
   }
 });
 
-router.delete("/ug", async (req, res, next) => {
+router.delete("/ug/:id", async (req, res, next) => {
   try {
-    // await models.ug
+    await models.ug.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+    res.status(200).json({ message: "Successfully deleted" });
   } catch (error) {
     next(error);
   }
@@ -160,8 +178,8 @@ function validateRequest(req) {
   if (!req.files.aadhar) return false;
   if (!req.files.thalassemia) return false;
 
-  if (!(caste_array.includes(req.body.category) && req.files.caste_certificate))
-    return false;
+  // if (!(caste_array.includes(req.body.category) && req.files.caste_certificate))
+  //   return false;
   return true;
 }
 function deleteFileFromTemp(files) {

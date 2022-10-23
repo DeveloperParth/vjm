@@ -25,6 +25,10 @@ module.exports = function (sequelize) {
         type: DataTypes.STRING(20),
         allowNull: false,
       },
+      year: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+      },
       father_name: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -34,6 +38,14 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       address: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+      },
+      taluka: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+      },
+      district: {
         type: DataTypes.STRING(20),
         allowNull: false,
       },
@@ -74,6 +86,10 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       physical_disability: {
+        type: DataTypes.ENUM("YES", "NO"),
+        allowNull: false,
+      },
+      disease: {
         type: DataTypes.ENUM("YES", "NO"),
         allowNull: false,
       },
@@ -161,12 +177,17 @@ module.exports = function (sequelize) {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      hsc_school: {
+      hsc_school_name: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+      },
+      hsc_school_number: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
     },
     {
+      paranoid: true,
       //   sequelize,
       tableName: "ug_applications",
       //   timestamps: false,

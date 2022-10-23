@@ -1,14 +1,14 @@
 const { Sequelize } = require("sequelize");
-// const sequelize = new Sequelize(process.env.DATABASE_URL, {
-//   ssl: {
-//     rejectUnauthorized: true,
-//   },
-// });
-
-const sequelize = new Sequelize("vjm", "root", "", {
-  dialect: "mysql",
-  host: "localhost",
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  ssl: {
+    rejectUnauthorized: true,
+  },
 });
+
+// const sequelize = new Sequelize("vjm", "root", "", {
+//   dialect: "mysql",
+//   host: "localhost",
+// });
 
 const modelDefiners = [
   require("../models/Ug"),
@@ -25,8 +25,32 @@ function applyExtraSetup(sequelize) {
   ugPhotos.belongsTo(ug);
 }
 applyExtraSetup(sequelize);
-// sequelize.sync({ force: true });
+// refreshDb();
 module.exports = sequelize;
+
+async function refreshDb() {
+  const bcrypt = require("bcrypt");
+  await sequelize.sync({ force: true });
+  const hashedPassword = bcrypt.hashSync("12345678", 10);
+  await sequelize.models.user.create({
+    email: "admin@gmail.com",
+    password: hashedPassword,
+    name: "Admin",
+    role: "ADMIN",
+  });
+  await sequelize.models.user.create({
+    email: "staff@gmail.com",
+    password: hashedPassword,
+    name: "Staff",
+    role: "STAFF",
+  });
+  await sequelize.models.user.create({
+    email: "student@gmail.com",
+    password: hashedPassword,
+    name: "Student",
+    role: "STUDENT",
+  });
+}
 
 // old mysql connection code
 

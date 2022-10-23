@@ -3,8 +3,8 @@ const BaseError = require("./../utils/BaseError");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sendPasswordMail } = require("./../utils/Mail");
-const checkAdmin = require("./../middlewares/checkAdmin");
 const { models } = require("../config/db");
+const GeneratePassword = require("./../utils/GeneratePassword");
 
 router.post("/auth/login", async (req, res, next) => {
   try {
@@ -30,14 +30,12 @@ router.post("/auth/login", async (req, res, next) => {
     next(error);
   }
 });
-
 router.post("/createuser", async (req, res, next) => {
   try {
     const { email, name, role } = req.body;
     if (!email || !name || !role)
       throw new BaseError(400, "Email, name and role is required");
-    const password = genPassword();
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = bcrypt.hashSync(GeneratePassword(), 10);
     const user = await models.user.findOne({
       raw: true,
       where: {
@@ -59,15 +57,4 @@ router.post("/createuser", async (req, res, next) => {
   }
 });
 
-function genPassword() {
-  const chars =
-    "0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const passwordLength = 12;
-  let password = "";
-  for (var i = 0; i <= passwordLength; i++) {
-    const randomNumber = Math.floor(Math.random() * chars.length);
-    password += chars.substring(randomNumber, randomNumber + 1);
-  }
-  return password;
-}
 module.exports = router;
