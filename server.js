@@ -10,6 +10,8 @@ app.use(cors());
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
+
+app.use("/uploads", express.static("./uploads"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", require("./routes/auth"));

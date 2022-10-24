@@ -1,14 +1,12 @@
 const router = require("express").Router();
 const upload = require("../middlewares/Upload");
 const BaseError = require("../utils/BaseError");
-const connection = require("./../config/db");
 const checkStaff = require("./../middlewares/checkStaff");
 const fs = require("fs");
 const { models } = require("../config/db");
 
 router.post(
   "/ug",
-  checkStaff,
   upload.fields([
     { name: "photo", maxCount: 1 },
     { name: "lc", maxCount: 1 },
@@ -102,7 +100,7 @@ router.post(
         email,
         hsc_stream,
         hsc_seat,
-        hsc_year: hsc_passing_year,
+        hsc_passing_year,
         hsc_month,
         hsc_attempt,
         hsc_total,
@@ -132,26 +130,22 @@ router.get("/ug", async (req, res, next) => {
     next(error);
   }
 });
-router.get("/ug/:id", checkStaff, async (req, res, next) => {
+router.get("/ug/:id", async (req, res, next) => {
   try {
     const response = await models.ug.findByPk(req.params.id, {
-      include: [{ model: models.ugPhotos }],
-      paranoid: false,
+      include: [{ model: models.ugPhotos, order: [["createdAt", "DESC"]] }],
+      // paranoid: res.locals.user.role === "ADMIN",
     });
     if (!response) throw new BaseError(404, "Not found");
-    if (response.isSoftDeleted && res.locals.user.role === "STAFF")
-      throw new BaseError(403, "Unauthorized");
+    // if (response.isSoftDeleted() && res.locals.user.role === "STAFF")
+    //   throw new BaseError(403, "Unauthorized");
     const data = response.dataValues;
-    const photos = {};
+
     data.ugPhotos.map((photo) => {
-      if (photos[photo.type]) {
-        photos[photo.type].push(photo);
-      } else {
-        photos[photo.type] = [photo];
-      }
+      data[photo.type.toLowerCase()] = photo;
     });
     delete data.ugPhotos;
-    res.status(200).json({ data: { ...data, photos } });
+    res.status(200).json({ data });
   } catch (error) {
     next(error);
   }
@@ -169,6 +163,40 @@ router.delete("/ug/:id", async (req, res, next) => {
     next(error);
   }
 });
+router.put(
+  "/ug/:id",
+  upload.fields([
+    { name: "photo", maxCount: 1 },
+    { name: "lc", maxCount: 1 },
+    { name: "ssc", maxCount: 1 },
+    { name: "hsc", maxCount: 1 },
+    { name: "aadhar", maxCount: 1 },
+    { name: "thalassemia", maxCount: 1 },
+    { name: "caste_certificate", maxCount: 1 },
+  ]),
+  async (req, res, next) => {
+    try {
+      console.log(req.files);
+      const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}`;
+      const userDirPath = `./uploads/${userDirName}`;
+      console.log(req.body);
+
+      await models.ug.update(
+        {
+          ...req.body,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      res.status(200).json({ message: "Successfully updated" });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 function validateRequest(req) {
   const caste_array = ["ST", "SC", "SEBC", "EBC"];

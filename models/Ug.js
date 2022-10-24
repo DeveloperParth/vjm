@@ -38,7 +38,7 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       address: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING(500),
         allowNull: false,
       },
       taluka: {
@@ -62,15 +62,15 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       whatsapp_mobile: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING(13),
         allowNull: false,
       },
       father_mobile: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING(13),
         allowNull: true,
       },
       home_mobile: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING(13),
         allowNull: true,
       },
       dob: {
@@ -137,7 +137,7 @@ module.exports = function (sequelize) {
         type: DataTypes.STRING(10),
         allowNull: false,
       },
-      hsc_year: {
+      hsc_passing_year: {
         type: DataTypes.STRING(4),
         allowNull: false,
       },
