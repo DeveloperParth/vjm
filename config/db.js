@@ -1,11 +1,11 @@
 const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
-  // dialectOptions: {
-  //   ssl: {
-  //     rejectUnauthorized: true,
-  //   },
-  // },
+  dialectOptions: {
+    ssl: {
+      rejectUnauthorized: true,
+    },
+  },
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -30,7 +30,7 @@ function applyExtraSetup(sequelize) {
   user.hasMany(ug, { as: "AddedBy", foreignKey: "addedBy" });
 }
 applyExtraSetup(sequelize);
-refreshDb();
+// refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {
