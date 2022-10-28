@@ -150,7 +150,6 @@ router.get("/ug/:id", async (req, res, next) => {
     next(error);
   }
 });
-
 router.delete("/ug/:id", async (req, res, next) => {
   try {
     await models.ug.destroy({
@@ -176,11 +175,10 @@ router.put(
   ]),
   async (req, res, next) => {
     try {
-      console.log(req.files);
       const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}`;
       const userDirPath = `./uploads/${userDirName}`;
-      console.log(req.body);
-
+      const isExists = await models.ug.findByPk(req.params.id);
+      if (!isExists) throw new BaseError(404, "Not found");
       await models.ug.update(
         {
           ...req.body,
