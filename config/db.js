@@ -1,21 +1,17 @@
 const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
-  dialectOptions: {
-    ssl: {
-      rejectUnauthorized: true,
-    },
-  },
+  // dialectOptions: {
+  //   ssl: {
+  //     rejectUnauthorized: true,
+  //   },
+  // },
 });
-
-// const sequelize = new Sequelize("vjm", "root", "", {
-//   dialect: "mysql",
-//   host: "localhost",
-// });
-
 const modelDefiners = [
   require("../models/Ug"),
+  require("../models/Pg"),
   require("../models/UgPhotos"),
+  require("../models/PgPhotos"),
   require("../models/User"),
 ];
 
@@ -23,12 +19,18 @@ for (const modelDefiner of modelDefiners) {
   modelDefiner(sequelize);
 }
 function applyExtraSetup(sequelize) {
-  const { ug, ugPhotos } = sequelize.models;
+  const { ug, ugPhotos, pg, pgPhotos, user } = sequelize.models;
   ug.hasMany(ugPhotos);
   ugPhotos.belongsTo(ug);
+
+  pg.hasMany(pgPhotos);
+  pgPhotos.belongsTo(pg);
+
+  ug.hasOne(user, { as: "AddedBy", foreignKey: "addedBy" });
+  user.hasMany(ug, { as: "AddedBy", foreignKey: "addedBy" });
 }
 applyExtraSetup(sequelize);
-// refreshDb();
+refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {

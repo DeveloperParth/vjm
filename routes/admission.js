@@ -4,6 +4,8 @@ const BaseError = require("../utils/BaseError");
 const checkStaff = require("./../middlewares/checkStaff");
 const fs = require("fs");
 const { models } = require("../config/db");
+const jwt = require("jsonwebtoken");
+const { sendDataVerificationMail } = require("../utils/Mail");
 
 router.post(
   "/ug",
@@ -64,10 +66,11 @@ router.post(
         hsc_school_name,
         hsc_school_number,
       } = req.body;
-      const isRequestValid = validateRequest(req);
-      if (!isRequestValid) {
-        deleteFileFromTemp(req.files);
-        throw new BaseError(400, "Plese fill all required field");
+      function convert(str) {
+        var date = new Date(str),
+          mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+          day = ("0" + date.getDate()).slice(-2);
+        return [date.getFullYear(), mnth, day].join("-");
       }
       const response = await models.ug.create({
         name,
@@ -86,7 +89,7 @@ router.post(
         whatsapp_mobile,
         father_mobile,
         home_mobile,
-        dob: Date(dob),
+        dob: convert(dob),
         gender,
         birth_place,
         disease,
@@ -114,7 +117,10 @@ router.post(
         hsc_school_number,
       });
       handleFiles(req, response.id);
-
+      const link = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
+        expiresIn: "15m",
+      });
+      sendDataVerificationMail(req.body.email, link);
       res.json({ data: response, message: "Submitted" });
     } catch (error) {
       next(error);
@@ -122,9 +128,24 @@ router.post(
   }
 );
 
-router.get("/ug", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    const data = await models.ug.findAll({});
+    const options = {};
+    // const data = [];
+    // switch (req.query.admission_type) {
+    //   case "ug":
+    //     data.concat(await models.ug.findAll(options));
+    //     break;
+    //   case "pg":
+    //     data.concat(await models.pg.findAll(options));
+    //     break;
+    //   default:
+    //     console.log("case");
+    //     data.concat(await models.ug.findAll(options));
+    //     data.concat(await models.pg.findAll(options));
+    //     break;
+    // }
+    const data = await models.ug.findAll();
     res.status(200).json({ data });
   } catch (error) {
     next(error);
@@ -133,14 +154,13 @@ router.get("/ug", async (req, res, next) => {
 router.get("/ug/:id", async (req, res, next) => {
   try {
     const response = await models.ug.findByPk(req.params.id, {
-      include: [{ model: models.ugPhotos, order: [["createdAt", "DESC"]] }],
+      include: [{ model: models.ugPhotos, where: { isLatest: true } }],
       // paranoid: res.locals.user.role === "ADMIN",
     });
     if (!response) throw new BaseError(404, "Not found");
     // if (response.isSoftDeleted() && res.locals.user.role === "STAFF")
     //   throw new BaseError(403, "Unauthorized");
     const data = response.dataValues;
-
     data.ugPhotos.map((photo) => {
       data[photo.type.toLowerCase()] = photo;
     });
@@ -175,8 +195,6 @@ router.put(
   ]),
   async (req, res, next) => {
     try {
-      const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}`;
-      const userDirPath = `./uploads/${userDirName}`;
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
       await models.ug.update(
@@ -189,34 +207,26 @@ router.put(
           },
         }
       );
+      console.time("file");
+      handleFiles(req, req.params.id);
+      console.timeEnd("file");
+
       res.status(200).json({ message: "Successfully updated" });
     } catch (error) {
       next(error);
     }
   }
 );
-
-function validateRequest(req) {
-  const caste_array = ["ST", "SC", "SEBC", "EBC"];
-  if (!req.files.photo) return false;
-  if (!req.files.hsc) return false;
-  if (!req.files.ssc) return false;
-  if (!req.files.aadhar) return false;
-  if (!req.files.thalassemia) return false;
-
-  // if (!(caste_array.includes(req.body.category) && req.files.caste_certificate))
-  //   return false;
-  return true;
-}
-function deleteFileFromTemp(files) {
-  for (const fileFieldName in files) {
-    const file = files[fileFieldName][0];
-    fs.unlinkSync(file.path);
-  }
-}
 async function handleFiles(req, ugId) {
-  const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}`;
+  const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${ugId}`;
   const userDirPath = `./uploads/${userDirName}`;
+  function checkIfExists(userDir, fieldname, iteration = 0) {
+    const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
+    if (fs.existsSync(path)) {
+      return checkIfExists(userDir, fieldname, iteration + 1);
+    }
+    return path;
+  }
 
   if (!fs.existsSync(userDirPath)) {
     fs.mkdirSync(userDirPath);
@@ -224,20 +234,25 @@ async function handleFiles(req, ugId) {
   for (const fileFieldName in req.files) {
     const file = req.files[fileFieldName][0];
     const oldpath = file.path;
-    const path = `${userDirPath}/${file.fieldname}.jpg`;
+    // const path = `${userDirPath}/${file.fieldname}.jpg`;
+    const path = checkIfExists(userDirPath, fileFieldName);
     fs.renameSync(oldpath, path);
+    await models.ugPhotos.update(
+      {
+        isLatest: false,
+      },
+      {
+        where: {
+          type: file.fieldname,
+          ugId,
+        },
+      }
+    );
     await models.ugPhotos.create({
       type: file.fieldname,
       path,
       ugId,
     });
   }
-}
-function checkIfExists(userDir, fieldname, iteration = 0) {
-  const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
-  if (fs.existsSync("./uploads" + path)) {
-    return checkIfExists(userDir, fieldname, iteration + 1);
-  }
-  return path;
 }
 module.exports = router;

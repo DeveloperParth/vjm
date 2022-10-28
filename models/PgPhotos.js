@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 module.exports = function (sequelize) {
-  return sequelize.define("ugPhotos", {
+  return sequelize.define("pgPhotos", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -18,10 +18,6 @@ module.exports = function (sequelize) {
         "THALASSEMIA"
       ),
       allowNull: false,
-    },
-    isLatest: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
     },
     path: {
       type: DataTypes.STRING,
