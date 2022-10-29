@@ -9,6 +9,7 @@ const { sendDataVerificationMail } = require("../utils/Mail");
 
 router.post(
   "/ug",
+  checkStaff,
   upload.fields([
     { name: "photo", maxCount: 1 },
     { name: "lc", maxCount: 1 },
@@ -30,14 +31,12 @@ router.post(
         father_name,
         mother_name,
         address,
-        taluka,
         district,
         city,
         pincode,
         state,
         whatsapp_mobile,
         father_mobile,
-        home_mobile,
         dob,
         gender,
         birth_place,
@@ -81,14 +80,12 @@ router.post(
         father_name,
         mother_name,
         address,
-        taluka,
         district,
         city,
         pincode,
         state,
         whatsapp_mobile,
         father_mobile,
-        home_mobile,
         dob: convert(dob),
         gender,
         birth_place,
@@ -101,6 +98,7 @@ router.post(
         aadhar_number,
         blood_group,
         email,
+        addedBy: res.locals.user?.id,
         hsc_stream,
         hsc_seat,
         hsc_passing_year,
@@ -184,6 +182,7 @@ router.delete("/ug/:id", async (req, res, next) => {
 });
 router.put(
   "/ug/:id",
+  checkStaff,
   upload.fields([
     { name: "photo", maxCount: 1 },
     { name: "lc", maxCount: 1 },
@@ -200,6 +199,7 @@ router.put(
       await models.ug.update(
         {
           ...req.body,
+          addedBy: res.locals.user.id,
         },
         {
           where: {
@@ -207,9 +207,7 @@ router.put(
           },
         }
       );
-      console.time("file");
       handleFiles(req, req.params.id);
-      console.timeEnd("file");
 
       res.status(200).json({ message: "Successfully updated" });
     } catch (error) {

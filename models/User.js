@@ -24,6 +24,10 @@ module.exports = function (sequelize) {
       role: {
         type: DataTypes.ENUM("ADMIN", "STAFF", "STUDENT"),
       },
+      forgotToken: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
     },
     {
       timestamps: true,

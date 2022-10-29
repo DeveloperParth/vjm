@@ -41,10 +41,6 @@ module.exports = function (sequelize) {
         type: DataTypes.STRING(500),
         allowNull: false,
       },
-      taluka: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-      },
       district: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -66,10 +62,6 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       father_mobile: {
-        type: DataTypes.STRING(13),
-        allowNull: true,
-      },
-      home_mobile: {
         type: DataTypes.STRING(13),
         allowNull: true,
       },

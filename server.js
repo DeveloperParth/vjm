@@ -15,6 +15,7 @@ app.use("/uploads", express.static("./uploads"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", require("./routes/auth"));
+app.use("/seed", require("./routes/seed"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/admission", require("./routes/admission"));
 

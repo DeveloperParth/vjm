@@ -1,11 +1,11 @@
 const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
-  dialectOptions: {
-    ssl: {
-      rejectUnauthorized: true,
-    },
-  },
+  // dialectOptions: {
+  //   ssl: {
+  //     rejectUnauthorized: true,
+  //   },
+  // },
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -30,10 +30,11 @@ function applyExtraSetup(sequelize) {
   user.hasMany(ug, { as: "AddedBy", foreignKey: "addedBy" });
 }
 applyExtraSetup(sequelize);
-// refreshDb();
+
 module.exports = sequelize;
 
 async function refreshDb() {
+  await sequelize.sync({ force: true });
   const bcrypt = require("bcrypt");
   await sequelize.sync({ force: true });
   const hashedPassword = bcrypt.hashSync("12345678", 10);
@@ -48,12 +49,6 @@ async function refreshDb() {
     password: hashedPassword,
     name: "Staff",
     role: "STAFF",
-  });
-  await sequelize.models.user.create({
-    email: "student@gmail.com",
-    password: hashedPassword,
-    name: "Student",
-    role: "STUDENT",
   });
 }
 

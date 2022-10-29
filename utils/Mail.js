@@ -10,13 +10,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function sendPasswordMail(email, password) {
+function sendPasswordMail(email, password, link) {
   transporter.sendMail(
     {
       from: process.env.MAIL_USER,
       to: email,
       subject: "Your account has been created",
-      html: `Your account has been created with the following email and password \n Email: ${email} \n Password: ${password}`,
+      html: `Your account has been created with the following email and password \n Email: ${email} \n Password: ${password}
+              <a href=${link}>Change password</a>`,
     },
     (error, info) => {
       if (error) {
