@@ -33,7 +33,7 @@ function applyExtraSetup(sequelize) {
   user.hasMany(ug, { as: "addedBy", foreignKey: "addedById" });
 }
 applyExtraSetup(sequelize);
-refreshDb();
+// refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {
