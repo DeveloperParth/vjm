@@ -17,6 +17,18 @@ module.exports = function (sequelize) {
         type: DataTypes.STRING(20),
         allowNull: false,
       },
+      sid: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
+      enrollment: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
+      password: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
       semester: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -180,17 +192,7 @@ module.exports = function (sequelize) {
     },
     {
       paranoid: true,
-      //   sequelize,
       tableName: "ug_applications",
-      //   timestamps: false,
-      //   indexes: [
-      //     {
-      //       name: "PRIMARY",
-      //       unique: true,
-      //       using: "BTREE",
-      //       fields: [{ name: "id" }],
-      //     },
-      //   ],
     }
   );
 };

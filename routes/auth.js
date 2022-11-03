@@ -7,6 +7,7 @@ const { models } = require("../config/db");
 const GeneratePassword = require("./../utils/GeneratePassword");
 
 const checkAdmin = require("./../middlewares/checkAdmin");
+const checkStaff = require("./../middlewares/checkStaff");
 
 router.post("/auth/login", async (req, res, next) => {
   try {
@@ -92,6 +93,23 @@ router.delete("/user/:id", checkAdmin, async (req, res, next) => {
       where: { id: req.params.id },
     });
     return res.status(200).json({ message: "User deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+router.post("/auth/change-password", checkStaff, async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await models.user.findByPk(res.locals.user.id);
+    console.log(oldPassword);
+    if (!user) throw new BaseError(404);
+    const isSame = bcrypt.compareSync(oldPassword, user.password);
+    if (!isSame) throw new BaseError(403, "Password is incorrect");
+    user.password = bcrypt.hashSync(newPassword, 10);
+    await user.save();
+    return res.status(200).json({
+      message: "Password has been changed successfully",
+    });
   } catch (error) {
     next(error);
   }

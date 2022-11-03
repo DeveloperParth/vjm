@@ -1,11 +1,14 @@
 const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
-  // dialectOptions: {
-  //   ssl: {
-  //     rejectUnauthorized: true,
-  //   },
-  // },
+  dialectOptions:
+    process.env.NODE_ENV === "production"
+      ? {
+          ssl: {
+            rejectUnauthorized: true,
+          },
+        }
+      : {},
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -26,25 +29,26 @@ function applyExtraSetup(sequelize) {
   pg.hasMany(pgPhotos);
   pgPhotos.belongsTo(pg);
 
-  ug.hasOne(user, { as: "AddedBy", foreignKey: "addedBy" });
-  user.hasMany(ug, { as: "AddedBy", foreignKey: "addedBy" });
+  ug.belongsTo(user, { as: "addedBy", foreignKey: "addedById" });
+  user.hasMany(ug, { as: "addedBy", foreignKey: "addedById" });
 }
 applyExtraSetup(sequelize);
-
+refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {
   await sequelize.sync({ force: true });
   const bcrypt = require("bcrypt");
-  await sequelize.sync({ force: true });
   const hashedPassword = bcrypt.hashSync("12345678", 10);
   await sequelize.models.user.create({
+    id: "0a9ba6ed-adc2-4599-ab95-592d92ca21bc",
     email: "admin@gmail.com",
     password: hashedPassword,
     name: "Admin",
     role: "ADMIN",
   });
   await sequelize.models.user.create({
+    id: "37812f2d-f38b-4d34-8a60-f7a02df9a35e",
     email: "staff@gmail.com",
     password: hashedPassword,
     name: "Staff",

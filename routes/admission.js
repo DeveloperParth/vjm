@@ -21,7 +21,6 @@ router.post(
   ]),
   async (req, res, next) => {
     try {
-      console.log(req.body);
       const {
         name,
         surname,
@@ -65,12 +64,6 @@ router.post(
         hsc_school_name,
         hsc_school_number,
       } = req.body;
-      function convert(str) {
-        var date = new Date(str),
-          mnth = ("0" + (date.getMonth() + 1)).slice(-2),
-          day = ("0" + date.getDate()).slice(-2);
-        return [date.getFullYear(), mnth, day].join("-");
-      }
       const response = await models.ug.create({
         name,
         surname,
@@ -86,7 +79,7 @@ router.post(
         state,
         whatsapp_mobile,
         father_mobile,
-        dob: convert(dob),
+        dob: dob,
         gender,
         birth_place,
         disease,
@@ -98,7 +91,7 @@ router.post(
         aadhar_number,
         blood_group,
         email,
-        addedBy: res.locals.user?.id,
+        addedById: res.locals.user?.id,
         hsc_stream,
         hsc_seat,
         hsc_passing_year,
@@ -126,24 +119,56 @@ router.post(
   }
 );
 
-router.get("/", async (req, res, next) => {
+router.get("/ug", async (req, res, next) => {
   try {
-    const options = {};
-    // const data = [];
-    // switch (req.query.admission_type) {
-    //   case "ug":
-    //     data.concat(await models.ug.findAll(options));
-    //     break;
-    //   case "pg":
-    //     data.concat(await models.pg.findAll(options));
-    //     break;
-    //   default:
-    //     console.log("case");
-    //     data.concat(await models.ug.findAll(options));
-    //     data.concat(await models.pg.findAll(options));
-    //     break;
-    // }
-    const data = await models.ug.findAll();
+    const data = await models.ug.findAll({
+      include: [
+        {
+          model: models.user,
+          as: "addedBy",
+          attributes: ["id", "name", "role"],
+        },
+      ],
+    });
+    res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+router.get("/stream/:stream", async (req, res, next) => {
+  try {
+    PG_STREAMS = ["MCOM_GUJ", "MCOM_ENG", "MSC_CHE", "MSC_IT"];
+    UG_STREAMS = ["BBA", "BCA", "BSC", "BCOM_GUJ", "BCOM_ENG", "BSW"];
+    let data = [];
+    if (UG_STREAMS.includes(req.params.stream.toUpperCase())) {
+      data = await models.ug.findAll({
+        where: {
+          stream: req.params.stream,
+        },
+        include: [
+          {
+            model: models.user,
+            as: "addedBy",
+            attributes: ["id", "name", "role"],
+          },
+        ],
+      });
+    } else if (PG_STREAMS.includes(req.params.stream)) {
+      data = await models.pg.findAll({
+        where: {
+          stream: req.params.stream,
+        },
+        include: [
+          {
+            model: models.user,
+            as: "addedBy",
+            attributes: ["id", "name", "role"],
+          },
+        ],
+      });
+    } else {
+      throw new BaseError("Invalid Stream", 400);
+    }
     res.status(200).json({ data });
   } catch (error) {
     next(error);
@@ -152,9 +177,17 @@ router.get("/", async (req, res, next) => {
 router.get("/ug/:id", async (req, res, next) => {
   try {
     const response = await models.ug.findByPk(req.params.id, {
-      include: [{ model: models.ugPhotos, where: { isLatest: true } }],
+      include: [
+        { model: models.ugPhotos, required: false, where: { isLatest: true } },
+        {
+          model: models.user,
+          as: "addedBy",
+          attributes: ["id", "name", "role"],
+        },
+      ],
       // paranoid: res.locals.user.role === "ADMIN",
     });
+    console.log(response);
     if (!response) throw new BaseError(404, "Not found");
     // if (response.isSoftDeleted() && res.locals.user.role === "STAFF")
     //   throw new BaseError(403, "Unauthorized");
@@ -196,6 +229,13 @@ router.put(
     try {
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
+      if (isExists.stream !== req.body.stream) {
+        const oldpath = path.join(
+          __dirname,
+          `../uploads/${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`
+        );
+        fs.renameSync();
+      }
       await models.ug.update(
         {
           ...req.body,
@@ -216,7 +256,7 @@ router.put(
   }
 );
 async function handleFiles(req, ugId) {
-  const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${ugId}`;
+  const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
     const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;

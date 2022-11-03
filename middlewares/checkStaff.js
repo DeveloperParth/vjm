@@ -5,7 +5,6 @@ const ALLOWED_ROLES = ["STAFF", "ADMIN"];
 module.exports = (req, res, next) => {
   try {
     let token = req.headers.authorization;
-    console.log(token);
     if (!token) throw new BaseError(401, "Token not provided");
     if (token.startsWith("Bearer")) {
       token = token.split(" ")[1];
