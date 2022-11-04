@@ -62,7 +62,7 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       pincode: {
-        type: DataTypes.STRING(6),
+        type: DataTypes.STRING(10),
         allowNull: false,
       },
       state: {
@@ -131,7 +131,7 @@ module.exports = function (sequelize) {
       },
       email: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       hsc_stream: {
         type: DataTypes.ENUM("ARTS", "COMMERCE", "SCIENCE"),
@@ -162,7 +162,7 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       hsc_percentage: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.DECIMAL(5, 2),
         allowNull: false,
       },
       hsc_percentile: {
@@ -179,7 +179,7 @@ module.exports = function (sequelize) {
       },
       hsc_center: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       hsc_school_name: {
         type: DataTypes.STRING(255),

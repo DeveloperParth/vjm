@@ -23,6 +23,7 @@ app.use("/api", require("./routes/auth"));
 app.use("/api", require("./routes/import"));
 app.use("/seed", require("./routes/seed"));
 app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/suggestions", require("./routes/suggestions"));
 app.use("/api/admission", require("./routes/admission"));
 
 app.use(ErrorHandler);

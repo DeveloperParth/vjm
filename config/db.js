@@ -1,6 +1,6 @@
 const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  logging: false,
+  // logging: false,
   dialectOptions:
     process.env.NODE_ENV === "production"
       ? {
@@ -23,14 +23,22 @@ for (const modelDefiner of modelDefiners) {
 }
 function applyExtraSetup(sequelize) {
   const { ug, ugPhotos, pg, pgPhotos, user } = sequelize.models;
-  ug.hasMany(ugPhotos);
-  ugPhotos.belongsTo(ug);
+  ug.hasMany(ugPhotos, { constraints: false });
+  ugPhotos.belongsTo(ug, { constraints: false });
 
-  pg.hasMany(pgPhotos);
-  pgPhotos.belongsTo(pg);
+  pg.hasMany(pgPhotos, { constraints: false });
+  pgPhotos.belongsTo(pg, { constraints: false });
 
-  ug.belongsTo(user, { as: "addedBy", foreignKey: "addedById" });
-  user.hasMany(ug, { as: "addedBy", foreignKey: "addedById" });
+  ug.belongsTo(user, {
+    as: "addedBy",
+    foreignKey: "addedById",
+    constraints: false,
+  });
+  user.hasMany(ug, {
+    as: "addedBy",
+    foreignKey: "addedById",
+    constraints: false,
+  });
 }
 applyExtraSetup(sequelize);
 // refreshDb();
