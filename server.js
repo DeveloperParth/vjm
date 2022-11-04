@@ -4,6 +4,7 @@ const ErrorHandler = require("./middlewares/ErrorHandler");
 const port = process.env.PORT || 3000;
 
 const cors = require("cors");
+const serveIndex = require("serve-index");
 
 app.use(cors());
 
@@ -11,7 +12,7 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-app.use("/uploads", express.static("./uploads"));
+app.use("/uploads", express.static("./uploads"), serveIndex("./uploads"));
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 
