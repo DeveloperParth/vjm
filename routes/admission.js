@@ -6,6 +6,7 @@ const fs = require("fs");
 const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
 const { sendDataVerificationMail } = require("../utils/Mail");
+const { resolve } = require("path");
 
 router.post(
   "/ug",
@@ -64,6 +65,8 @@ router.post(
         hsc_school_name,
         hsc_school_number,
       } = req.body;
+      const parsedDob = dob.split("/").reverse().join("/");
+
       const response = await models.ug.create({
         name,
         surname,
@@ -79,7 +82,7 @@ router.post(
         state,
         whatsapp_mobile,
         father_mobile,
-        dob: dob,
+        dob: parsedDob,
         gender,
         birth_place,
         disease,
@@ -108,10 +111,11 @@ router.post(
         hsc_school_number,
       });
       handleFiles(req, response.id);
-      const link = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
+      const token = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
         expiresIn: "15m",
       });
-      sendDataVerificationMail(req.body.email, link);
+      const link = `${process.env.CLIENT_URL}/verify/${token}`;
+      sendDataVerificationMail(req.body.email, response.dataValues, link);
       res.json({ data: response, message: "Submitted" });
     } catch (error) {
       next(error);
@@ -260,21 +264,21 @@ async function handleFiles(req, ugId) {
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
     const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
-    if (fs.existsSync(path)) {
+    if (fs.existsSync(resolve(path))) {
       return checkIfExists(userDir, fieldname, iteration + 1);
     }
     return path;
   }
 
-  if (!fs.existsSync(userDirPath)) {
-    fs.mkdirSync(userDirPath);
+  if (!fs.existsSync(resolve(userDirPath))) {
+    fs.mkdirSync(resolve(userDirPath));
   }
   for (const fileFieldName in req.files) {
     const file = req.files[fileFieldName][0];
     const oldpath = file.path;
-    // const path = `${userDirPath}/${file.fieldname}.jpg`;
     const path = checkIfExists(userDirPath, fileFieldName);
-    fs.renameSync(oldpath, path);
+    fs.renameSync(resolve(oldpath), resolve(path));
+    // fs.unlinkSync(resolve(oldpath));
     await models.ugPhotos.update(
       {
         isLatest: false,

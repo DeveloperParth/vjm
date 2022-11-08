@@ -1,15 +1,46 @@
 const nodemailer = require("nodemailer");
-const transporter = nodemailer.createTransport({
-  host: "smtp.zoho.in",
-  port: 465,
-  secure: true,
+const hbs = require("nodemailer-express-handlebars");
 
+console.log(process.env.MAIL_USER);
+const transporter = nodemailer.createTransport({
+  // host: "smtp.zoho.in",
+  // host: "smtp.gmail.com",
+  // port: 465,
+  // secure: true,
+
+  // auth: {
+  //   user: process.env.MAIL_USER,
+  //   pass: process.env.MAIL_PASSWORD,
+  // },
+  host: "smtp.ethereal.email",
+  port: 587,
   auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASSWORD,
+    user: "katrine.bashirian@ethereal.email",
+    pass: "EC7sNp4y19W5HW8h5K",
   },
 });
 
+transporter.use(
+  "compile",
+  hbs({
+    viewEngine: {
+      //extension name
+      extName: ".handlebars",
+      // layout path declare
+      layoutsDir: "./views/",
+      defaultLayout: false,
+      helpers: {
+        formatKey: function (str) {
+          return str.replace(/_/g, " ");
+        },
+      },
+      // express,
+    },
+    //View path declare
+    viewPath: "./views",
+    extName: ".handlebars",
+  })
+);
 function sendPasswordMail(email, password, link) {
   transporter.sendMail(
     {
@@ -29,18 +60,24 @@ function sendPasswordMail(email, password, link) {
   );
 }
 
-function sendDataVerificationMail(email, link) {
+function sendDataVerificationMail(email, data, link) {
   transporter.sendMail(
     {
       from: process.env.MAIL_USER,
       to: email,
       subject: "Your application has been submitted",
-      html: `Your application has been submitted please verify via clicking the link <a href=${link}>Verify</a>`,
+      template: "verify",
+
+      context: {
+        data,
+        link,
+      },
     },
     (error, info) => {
       if (error) {
         throw error;
       }
+      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     }
   );
 }

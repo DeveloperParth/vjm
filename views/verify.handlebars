@@ -1,0 +1,115 @@
+<html lang="en-US">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>Appointment Reminder Email Template</title>
+    <meta name="description" content="Appointment Reminder Email Template" />
+    <style>
+      main { margin: auto; display: flex; justify-content: center; align-items:
+      center; flex-direction: column; gap: 40px; width: 80%; max-width: 670px;
+      background: #fff; border-radius: 3px; -webkit-box-shadow: 0 6px 18px 0
+      rgba(0, 0, 0, 0.06); -moz-box-shadow: 0 6px 18px 0 rgba(0, 0, 0, 0.06);
+      box-shadow: 0 6px 18px 0 rgba(0, 0, 0, 0.06); padding: 20px 40px; } .btn {
+      background-color: #1a2556; cursor: pointer; border-radius: 5px; padding:
+      .75em 1.25em; font-size: 1.25rem; text-transform: capitalize;
+      text-decoration: none; font-weight: bold; color: white; transition: .2s;}
+      .btn:hover{ text-decoration: none; scale: 1.1; } td{ padding: 10px;
+      border-bottom: 1px solid #ededed; } .detail-title-td{ border-right: 1px
+      solid #ededed; width: 35%; font-weight: 500; color: rgba(0, 0, 0, 0.64);
+      text-transform: capitalize;} .detail-td{ color: #455056; }
+
+    </style>
+  </head>
+
+  <body
+    marginheight="0"
+    topmargin="0"
+    marginwidth="0"
+    style="margin: 0px; background-color: #f2f3f8"
+    leftmargin="0"
+  >
+    <main>
+      <a href="https://rakeshmandal.com" title="logo" target="_blank">
+        <img
+          width="100"
+          src="http://www.shrivjmodhacollege.com/images/icon.png"
+          title="logo"
+          alt="logo"
+        />
+      </a>
+
+      <h1
+        style="
+                          color: #1e1e2d;
+                          font-weight: 400;
+                          margin: 0;
+                          font-size: 32px;
+                          font-family: 'Rubik', sans-serif;
+                        "
+      >
+        Admission Form Details
+      </h1>
+
+      <table
+        cellpadding="0"
+        cellspacing="0"
+        style="width: 100%; border: 1px solid #ededed"
+      >
+        <tbody>
+
+          {{!-- <tr>
+                        <td
+                          style="
+                                padding: 10px;
+                                border-bottom: 1px solid #ededed;
+                                border-right: 1px solid #ededed;
+                                width: 35%;
+                                font-weight: 500;
+                                color: rgba(0, 0, 0, 0.64);
+                              "
+                        >
+                          Surname:
+                        </td>
+                        <td
+                          style="
+                                padding: 10px;
+                                border-bottom: 1px solid #ededed;
+                                color: #455056;
+                              "
+                        >
+                          {{data.surname}}
+                        </td>
+                        <td
+                          rowspan="3"
+                          style="
+                                padding: 10px 10px 10px 10px;
+                                border-bottom: 1px solid #ededed;
+                                color: #455056;
+                              "
+                        >
+
+                          <img
+                            src="https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png"
+                            alt="Flowers in Chania"
+                            height="auto"
+                            width="100px"
+                          />
+                        </td>
+                      </tr> --}}
+
+          {{#each data}}
+            <tr>
+              <td class="detail-title-td">
+                {{formatKey @key}}:
+              </td>
+              <td class="detail-td">
+                {{this}}
+              </td>
+            </tr>
+          {{/each}}
+
+        </tbody>
+      </table>
+      <a class="btn" href={{link}}>Verify</a>
+    </main>
+  </body>
+</html>
