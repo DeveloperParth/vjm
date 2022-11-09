@@ -83,10 +83,16 @@ module.exports = function (sequelize) {
       },
       dob: {
         type: DataTypes.DATEONLY,
+        set: (value) => {
+          this.setDataValue(
+            "dob",
+            Sequelize.fn("to_date", value, "DD/MM/YYYY")
+          );
+        },
         allowNull: true,
       },
       gender: {
-        type: DataTypes.ENUM("MALE", "FEMALE"),
+        type: DataTypes.STRING(20),
         allowNull: true,
       },
       birth_place: {
@@ -94,19 +100,19 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       physical_disability: {
-        type: DataTypes.ENUM("YES", "NO"),
+        type: DataTypes.STRING(10),
         allowNull: true,
       },
       disease: {
-        type: DataTypes.ENUM("YES", "NO"),
+        type: DataTypes.STRING(10),
         allowNull: true,
       },
       category: {
-        type: DataTypes.ENUM("GEN", "SEBC", "EBC", "SC", "ST"),
+        type: DataTypes.STRING(10),
         allowNull: true,
       },
       minority: {
-        type: DataTypes.ENUM("YES", "NO"),
+        type: DataTypes.STRING(10),
         allowNull: true,
       },
       religion: {
@@ -122,11 +128,11 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       caste: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       aadhar_number: {
-        type: DataTypes.STRING(12),
+        type: DataTypes.STRING(20),
         allowNull: true,
       },
       blood_group: {
@@ -138,11 +144,11 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       hsc_stream: {
-        type: DataTypes.ENUM("ARTS", "COMMERCE", "SCIENCE"),
+        type: DataTypes.STRING(20),
         allowNull: true,
       },
       hsc_seat: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING(25),
         allowNull: true,
       },
       hsc_passing_year: {
