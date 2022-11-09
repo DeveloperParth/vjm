@@ -1,12 +1,13 @@
 const router = require("express").Router();
 const { models } = require("../config/db");
 
+const { ugSchema } = require("../utils/Validation");
+
 const checkStaff = require("./../middlewares/checkStaff");
 
 router.post("/import/ug", checkStaff, async (req, res, next) => {
   try {
     const data = req.body.data;
-    console.log(data.length);
     data.map((record) => {
       record.addedBy = res.locals.user.id;
       return record;

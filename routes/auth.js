@@ -51,7 +51,7 @@ router.post("/user/create", async (req, res, next) => {
     const insertResult = await models.user.create({
       name,
       email,
-      role,
+      role: role.toUpperCase(),
       password: hashedPassword,
     });
     if (!insertResult.id) throw new BaseError();

@@ -7,6 +7,8 @@ const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
 const { sendDataVerificationMail } = require("../utils/Mail");
 const { resolve } = require("path");
+const { ugSchema } = require("../utils/Validation");
+const Joi = require("joi");
 
 router.post(
   "/ug",
@@ -22,6 +24,7 @@ router.post(
   ]),
   async (req, res, next) => {
     try {
+      await ugSchema.validateAsync(req.body, { abortEarly: true });
       const {
         name,
         surname,
@@ -118,6 +121,8 @@ router.post(
       sendDataVerificationMail(req.body.email, response.dataValues, link);
       res.json({ data: response, message: "Submitted" });
     } catch (error) {
+      if (error.isJoi)
+        return next(new BaseError(400, error.message.replace(/"/g, "'")));
       next(error);
     }
   }
