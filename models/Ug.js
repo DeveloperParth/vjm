@@ -83,7 +83,7 @@ module.exports = function (sequelize) {
       },
       dob: {
         type: DataTypes.DATEONLY,
-        set: (value) => {
+        set(value) {
           this.setDataValue(
             "dob",
             Sequelize.fn("to_date", value, "DD/MM/YYYY")
