@@ -264,6 +264,23 @@ router.put(
     }
   }
 );
+router.get("/verify/ug/:token", async (req, res, next) => {
+  try {
+    const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
+    await models.ug.update(
+      {
+        isVerified: true,
+      },
+      {
+        where: {
+          id: decoded.id,
+        },
+      }
+    );
+  } catch (error) {
+    next(error);
+  }
+});
 async function handleFiles(req, ugId) {
   const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
   const userDirPath = `./uploads/${userDirName}`;

@@ -33,7 +33,7 @@ router.post("/auth/login", async (req, res, next) => {
     next(error);
   }
 });
-router.post("/user/create", async (req, res, next) => {
+router.post("/user/create", checkAdmin, async (req, res, next) => {
   try {
     const { email, name, role } = req.body;
     if (!email || !name || !role)

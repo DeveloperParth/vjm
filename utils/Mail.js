@@ -4,19 +4,12 @@ const hbs = require("nodemailer-express-handlebars");
 console.log(process.env.MAIL_USER);
 const transporter = nodemailer.createTransport({
   // host: "smtp.zoho.in",
-  // host: "smtp.gmail.com",
-  // port: 465,
-  // secure: true,
-
-  // auth: {
-  //   user: process.env.MAIL_USER,
-  //   pass: process.env.MAIL_PASSWORD,
-  // },
-  host: "smtp.ethereal.email",
-  port: 587,
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: "katrine.bashirian@ethereal.email",
-    pass: "EC7sNp4y19W5HW8h5K",
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASSWORD,
   },
 });
 
