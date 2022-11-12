@@ -132,7 +132,7 @@ module.exports = function (sequelize) {
         unique: true,
       },
       blood_group: {
-        type: DataTypes.ENUM("A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       email: {

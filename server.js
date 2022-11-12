@@ -7,7 +7,7 @@ const cors = require("cors");
 const serveIndex = require("serve-index");
 const checkAdmin = require("./middlewares/checkAdmin");
 
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL }));
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
