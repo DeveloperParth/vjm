@@ -61,7 +61,7 @@ router.post("/user/create", checkAdmin, async (req, res, next) => {
     });
     user.forgotToken = token;
     await user.save();
-    const link = `http://localhost:3000/forgot/${token}`;
+    const link = `${process.env.FRONTEND_URL}/forgot/${token}`;
     console.log(link);
     sendPasswordMail(email, password, link);
 

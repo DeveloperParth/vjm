@@ -8,19 +8,13 @@ router.get("/", async (req, res, next) => {
     const year = new Date().getFullYear();
     const ugCurrentData = await models.ug.count({
       where: {
-        createdAt: {
-          [Op.gte]: new Date(year, 0, 1),
-          [Op.lte]: new Date(year, 11, 31),
-        },
+        year,
       },
       group: ["stream"],
     });
     const pgCurrentData = await models.pg.count({
       where: {
-        createdAt: {
-          [Op.gte]: new Date(year, 0, 1),
-          [Op.lte]: new Date(year, 11, 31),
-        },
+        year,
       },
       group: ["stream"],
     });

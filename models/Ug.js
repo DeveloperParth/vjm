@@ -1,3 +1,4 @@
+const { array } = require("joi");
 const { DataTypes, Sequelize } = require("sequelize");
 module.exports = function (sequelize) {
   return sequelize.define(
@@ -82,7 +83,7 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       dob: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.STRING(40),
         allowNull: true,
       },
       gender: {
@@ -128,6 +129,7 @@ module.exports = function (sequelize) {
       aadhar_number: {
         type: DataTypes.STRING(20),
         allowNull: true,
+        unique: true,
       },
       blood_group: {
         type: DataTypes.ENUM("A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"),

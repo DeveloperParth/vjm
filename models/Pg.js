@@ -134,15 +134,15 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       hsc_seat: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_passing_year: {
-        type: DataTypes.STRING(4),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_month: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_attempt: {
@@ -150,97 +150,130 @@ module.exports = function (sequelize) {
         allowNull: false,
       },
       hsc_total: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_obtained: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_percentage: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_percentile: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_grade: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_board: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_center: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_school_name: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       hsc_school_number: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
       ug_degree: {
-        type: DataTypes.ENUM("ARTS", "COMMERCE", "SCIENCE"),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      ug_stream: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_seat: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_passing_year: {
-        type: DataTypes.STRING(4),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_month: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_attempt: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_total: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_obtained: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       ug_percentage: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      ug_percentile: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+      ug_college_name: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      ug_grade: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+      ug_university: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      ug_board: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
+
+      pg_degree: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      ug_center: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
+      pg_stream: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      ug_school_name: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
+      pg_seat: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      ug_school_number: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
+      pg_passing_year: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_month: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_attempt: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_total: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_obtained: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_percentage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_college_name: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      pg_university: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {

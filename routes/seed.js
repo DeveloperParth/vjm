@@ -1,6 +1,4 @@
 const router = require("express").Router();
-
-const { sendDataVerificationMail } = require("../utils/Mail");
 const { models } = require("./../config/db");
 
 router.get("/", async (req, res, next) => {

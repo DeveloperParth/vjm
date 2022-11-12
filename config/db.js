@@ -1,6 +1,6 @@
 const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  // logging: false,
+  logging: false,
   dialectOptions:
     process.env.NODE_ENV === "production"
       ? {
@@ -63,9 +63,3 @@ async function refreshDb() {
     role: "STAFF",
   });
 }
-
-// old mysql connection code
-
-// const mysql = require('mysql2/promise');
-// const connection = mysql.createPool(process.env.DATABASE_URL);
-// module.exports = connection;

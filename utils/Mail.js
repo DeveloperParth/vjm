@@ -40,8 +40,12 @@ function sendPasswordMail(email, password, link) {
       from: process.env.MAIL_USER,
       to: email,
       subject: "Your account has been created",
-      html: `Your account has been created with the following email and password \n Email: ${email} \n Password: ${password}
-              <a href=${link}>Change password</a>`,
+      template: "password",
+      context: {
+        password,
+        link,
+        email,
+      },
     },
     (error, info) => {
       if (error) {

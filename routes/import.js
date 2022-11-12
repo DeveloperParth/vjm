@@ -1,15 +1,14 @@
 const router = require("express").Router();
 const { models } = require("../config/db");
-
-const { ugSchema } = require("../utils/Validation");
-
 const checkStaff = require("./../middlewares/checkStaff");
 
 router.post("/import/ug", checkStaff, async (req, res, next) => {
   try {
     const data = req.body.data;
+    console.log(req.body.data[0].dob);
     data.map((record) => {
       record.addedBy = res.locals.user.id;
+      record.dob = record.dob.split("T")[0].split("-").reverse().join("-");
       return record;
     });
     const response = await models.ug.bulkCreate(data, {
