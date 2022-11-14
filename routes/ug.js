@@ -9,6 +9,7 @@ const { sendDataVerificationMail } = require("../utils/Mail");
 const { resolve } = require("path");
 const { ugSchema } = require("../utils/Validation");
 const Joi = require("joi");
+const path = require("path");
 
 router.post(
   "/",
@@ -83,7 +84,7 @@ router.post(
         state,
         whatsapp_mobile,
         father_mobile,
-        dob: parsedDob,
+        dob,
         gender,
         birth_place,
         disease,
@@ -153,12 +154,8 @@ router.get("/:id", async (req, res, next) => {
           attributes: ["id", "name", "role"],
         },
       ],
-      // paranoid: res.locals.user.role === "ADMIN",
     });
-    console.log(response);
     if (!response) throw new BaseError(404, "Not found");
-    // if (response.isSoftDeleted() && res.locals.user.role === "STAFF")
-    //   throw new BaseError(403, "Unauthorized");
     const data = response.dataValues;
     data.dob = data.dob;
     data.ugPhotos.map((photo) => {
@@ -198,12 +195,17 @@ router.put(
     try {
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
-      if (isExists.stream !== req.body.stream) {
+      if (isExists.stream !== req.body.stream || isExists.semester !== req.body.semester || isExists.name !== req.body.name || isExists.surname !== req.body.surname || isExists.aadhar_number !== req.body.aadhar_number) {
+        console.log("inside if");
+        const newpath = path.join(
+          __dirname,
+          `../uploads/${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aaadhar_number}`
+        );
         const oldpath = path.join(
           __dirname,
-          `../uploads/${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`
+          `../uploads/${isExists.stream}-${isExists.semester}-${isExists.name} ${isExists.surname}-${isExists.aadhar_number}`
         );
-        fs.renameSync();
+        fs.renameSync(oldpath, newpath);
       }
       await models.ug.update(
         {
@@ -242,7 +244,7 @@ router.get("/verify/:token", async (req, res, next) => {
   }
 });
 async function handleFiles(req, ugId) {
-  const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
+  const userDirName = `${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`; 
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
     const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;

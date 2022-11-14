@@ -2,13 +2,12 @@ const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
   dialectOptions:
-    process.env.NODE_ENV === "production"
-      ? {
-          ssl: {
-            rejectUnauthorized: true,
-          },
-        }
-      : {},
+  {
+    ssl: {
+      rejectUnauthorized: true,
+    },
+  }
+
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -36,6 +35,17 @@ function applyExtraSetup(sequelize) {
   });
   user.hasMany(ug, {
     as: "addedBy",
+    foreignKey: "addedById",
+    constraints: false,
+  });
+
+  pg.belongsTo(user, {
+    as: "addedBy",
+    foreignKey: "addedById",
+    constraints: false,
+  });
+  user.hasMany(pg, {
+    // as: "addedBy",
     foreignKey: "addedById",
     constraints: false,
   });

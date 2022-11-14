@@ -8,7 +8,6 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
     console.log(req.body.data[0].dob);
     data.map((record) => {
       record.addedBy = res.locals.user.id;
-      record.dob = record.dob.split("T")[0].split("-").reverse().join("-");
       return record;
     });
     const response = await models.ug.bulkCreate(data, {

@@ -7,11 +7,10 @@ const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
 const { sendDataVerificationMail } = require("../utils/Mail");
 const { resolve } = require("path");
-const { ugSchema } = require("../utils/Validation");
-const Joi = require("joi");
+const { pgSchema } = require("../utils/Validation");
 
 router.post(
-  "/ug",
+  "/",
   checkStaff,
   upload.fields([
     { name: "photo", maxCount: 1 },
@@ -21,10 +20,11 @@ router.post(
     { name: "aadhar", maxCount: 1 },
     { name: "thalassemia", maxCount: 1 },
     { name: "caste_certificate", maxCount: 1 },
+    { name: "all_marksheets", maxCount: 6 },
   ]),
   async (req, res, next) => {
     try {
-      await ugSchema.validateAsync(req.body, { abortEarly: true });
+      await pgSchema.validateAsync(req.body, { abortEarly: true });
       const {
         name,
         surname,
@@ -92,7 +92,6 @@ router.post(
         pg_college_name,
         pg_university,
       } = req.body;
-      const parsedDob = dob.split("/").reverse().join("/");
 
       const response = await models.ug.create({
         name,
@@ -109,7 +108,7 @@ router.post(
         state,
         whatsapp_mobile,
         father_mobile,
-        dob: parsedDob,
+        dob,
         gender,
         birth_place,
         disease,
@@ -176,9 +175,9 @@ router.post(
   }
 );
 
-router.get("/ug", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    const data = await models.ug.findAll({
+    const data = await models.pg.findAll({
       include: [
         {
           model: models.user,
@@ -192,76 +191,32 @@ router.get("/ug", async (req, res, next) => {
     next(error);
   }
 });
-router.get("/stream/:stream", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
-    PG_STREAMS = ["MCOM_GUJ", "MCOM_ENG", "MSC_CHE", "MSC_IT"];
-    UG_STREAMS = ["BBA", "BCA", "BSC", "BCOM_GUJ", "BCOM_ENG", "BSW"];
-    let data = [];
-    if (UG_STREAMS.includes(req.params.stream.toUpperCase())) {
-      data = await models.ug.findAll({
-        where: {
-          stream: req.params.stream,
-        },
-        include: [
-          {
-            model: models.user,
-            as: "addedBy",
-            attributes: ["id", "name", "role"],
-          },
-        ],
-      });
-    } else if (PG_STREAMS.includes(req.params.stream)) {
-      data = await models.pg.findAll({
-        where: {
-          stream: req.params.stream,
-        },
-        include: [
-          {
-            model: models.user,
-            as: "addedBy",
-            attributes: ["id", "name", "role"],
-          },
-        ],
-      });
-    } else {
-      throw new BaseError("Invalid Stream", 400);
-    }
-    res.status(200).json({ data });
-  } catch (error) {
-    next(error);
-  }
-});
-router.get("/ug/:id", async (req, res, next) => {
-  try {
-    const response = await models.ug.findByPk(req.params.id, {
+    const response = await models.pg.findByPk(req.params.id, {
       include: [
-        { model: models.ugPhotos, required: false, where: { isLatest: true } },
+        { model: models.pgPhotos, required: false, where: { isLatest: true } },
         {
           model: models.user,
           as: "addedBy",
           attributes: ["id", "name", "role"],
         },
       ],
-      // paranoid: res.locals.user.role === "ADMIN",
     });
-    console.log(response);
     if (!response) throw new BaseError(404, "Not found");
-    // if (response.isSoftDeleted() && res.locals.user.role === "STAFF")
-    //   throw new BaseError(403, "Unauthorized");
     const data = response.dataValues;
-    data.dob = data.dob;
-    data.ugPhotos.map((photo) => {
+    data.pgPhotos.map((photo) => {
       data[photo.type.toLowerCase()] = photo;
     });
-    delete data.ugPhotos;
+    delete data.pgPhotos;
     res.status(200).json({ data });
   } catch (error) {
     next(error);
   }
 });
-router.delete("/ug/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
-    await models.ug.destroy({
+    await models.pg.destroy({
       where: {
         id: req.params.id,
       },
@@ -272,7 +227,7 @@ router.delete("/ug/:id", async (req, res, next) => {
   }
 });
 router.put(
-  "/ug/:id",
+  "/:id",
   checkStaff,
   upload.fields([
     { name: "photo", maxCount: 1 },
@@ -288,11 +243,15 @@ router.put(
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
       if (isExists.stream !== req.body.stream) {
-        const oldpath = path.join(
+        const newpath = path.join(
           __dirname,
           `../uploads/${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`
         );
-        fs.renameSync();
+        const oldpath = path.join(
+          __dirname,
+          `../uploads/${isExists.stream}${isExists.semester}-${isExists.name} ${isExists.surname}-${isExists.whatsapp_mobile}`
+        );
+        fs.renameSync(oldpath, newpath);
       }
       await models.ug.update(
         {

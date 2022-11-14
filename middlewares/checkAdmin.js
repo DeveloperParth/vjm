@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
       res.locals.user = decoded;
       next();
     } else {
-      throw BaseError(401, "Unauthenticated");
+      throw new BaseError(401, "Unauthenticated");
     }
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError)

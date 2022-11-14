@@ -1,17 +1,17 @@
 const express = require("express");
 const app = express();
 const ErrorHandler = require("./middlewares/ErrorHandler");
-const port = process.env.PORT || 3000;
 
 const cors = require("cors");
 const serveIndex = require("serve-index");
 const checkAdmin = require("./middlewares/checkAdmin");
 
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors());
 
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
+const port = process.env.PORT || 3000;
 
 app.use("/uploads", express.static("./uploads"), serveIndex("./uploads"));
 // app.use(express.json());
