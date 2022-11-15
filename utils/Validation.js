@@ -1,6 +1,4 @@
-const jo = require("joi");
-
-const joi = jo.extend(require("@joi/date"));
+const joi = require("joi");
 
 // genereate joi schema for ug sequelize model
 const ugSchema = joi
@@ -126,6 +124,18 @@ const pgSchema = joi
     blood_group: joi.string().allow("").optional(),
 
     father_mobile: joi.string().allow("").optional(),
+
+    ug_stream: joi.string().required(),
+    ug_degree: joi.string().required(),
+    ug_seat: joi.string().required(),
+    ug_passing_year: joi.any().required(),
+    ug_month: joi.string().required(),
+    ug_attempt: joi.number().integer().required(),
+    ug_total: joi.number().integer().required(),
+    ug_obtained: joi.number().integer().required(),
+    ug_percentage: joi.number().integer().min(1).max(100).required(),
+    ug_college_name: joi.string().required(),
+    ug_university: joi.string().required(),
   })
   .options({ allowUnknown: true });
 

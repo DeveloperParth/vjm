@@ -24,6 +24,7 @@ router.post(
   ]),
   async (req, res, next) => {
     try {
+      console.log(req.body.ug_seat);
       await pgSchema.validateAsync(req.body, { abortEarly: true });
       const {
         name,
@@ -93,7 +94,7 @@ router.post(
         pg_university,
       } = req.body;
 
-      const response = await models.ug.create({
+      const response = await models.pg.create({
         name,
         surname,
         semester,
@@ -164,7 +165,7 @@ router.post(
       const token = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
         expiresIn: "15m",
       });
-      const link = `${process.env.CLIENT_URL}/pg/verify/${token}`;
+      const link = `${process.env.FRONTEND_URL}/pg/verify/${token}`;
       sendDataVerificationMail(req.body.email, response.dataValues, link);
       res.json({ data: response, message: "Submitted" });
     } catch (error) {
@@ -186,6 +187,7 @@ router.get("/", async (req, res, next) => {
         },
       ],
     });
+    console.log(data);
     res.status(200).json({ data });
   } catch (error) {
     next(error);
@@ -289,7 +291,7 @@ router.get("/verify/ug/:token", async (req, res, next) => {
     next(error);
   }
 });
-async function handleFiles(req, ugId) {
+async function handleFiles(req, pgId) {
   const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
@@ -309,21 +311,21 @@ async function handleFiles(req, ugId) {
     const path = checkIfExists(userDirPath, fileFieldName);
     fs.renameSync(resolve(oldpath), resolve(path));
     // fs.unlinkSync(resolve(oldpath));
-    await models.ugPhotos.update(
+    await models.pgPhotos.update(
       {
         isLatest: false,
       },
       {
         where: {
           type: file.fieldname,
-          ugId,
+          pgId,
         },
       }
     );
-    await models.ugPhotos.create({
+    await models.pgPhotos.create({
       type: file.fieldname,
       path,
-      ugId,
+      pgId,
     });
   }
 }

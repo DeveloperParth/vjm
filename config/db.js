@@ -2,12 +2,14 @@ const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
   dialectOptions:
-  {
-    ssl: {
-      rejectUnauthorized: true,
-    },
-  }
-
+    process.env.NODE_ENV === "production"
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -15,18 +17,31 @@ const modelDefiners = [
   require("../models/UgPhotos"),
   require("../models/PgPhotos"),
   require("../models/User"),
+  require("../models/Stream"),
 ];
 
 for (const modelDefiner of modelDefiners) {
   modelDefiner(sequelize);
 }
 function applyExtraSetup(sequelize) {
-  const { ug, ugPhotos, pg, pgPhotos, user } = sequelize.models;
+  const { ug, ugPhotos, pg, pgPhotos, user, stream } = sequelize.models;
+
+  //define relationship: ug has a stream and stream has many ugs
+  ug.belongsTo(stream, { constraints: false });
+  stream.hasMany(ug, { constraints: false });
+
+  pg.belongsTo(stream, { constraints: false });
+  stream.hasMany(pg, { constraints: false });
+
+  //define relationship: ug has many photos and photo belongs to ug
+
   ug.hasMany(ugPhotos, { constraints: false });
   ugPhotos.belongsTo(ug, { constraints: false });
 
   pg.hasMany(pgPhotos, { constraints: false });
   pgPhotos.belongsTo(pg, { constraints: false });
+
+  //define relationship: user has many ugs and ug belongs to user
 
   ug.belongsTo(user, {
     as: "addedBy",
@@ -51,7 +66,7 @@ function applyExtraSetup(sequelize) {
   });
 }
 applyExtraSetup(sequelize);
-refreshDb();
+// refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {

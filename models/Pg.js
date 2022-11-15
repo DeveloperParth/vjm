@@ -1,4 +1,4 @@
-const { DataTypes, Sequelize } = require("sequelize");
+const { DataTypes } = require("sequelize");
 module.exports = function (sequelize) {
   return sequelize.define(
     "pg",
@@ -21,10 +21,10 @@ module.exports = function (sequelize) {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      stream: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-      },
+      // tream: {
+      //   type: DataTypes.STRING(20),
+      //   allowNull: false,
+      // },s
       year: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -39,10 +39,6 @@ module.exports = function (sequelize) {
       },
       address: {
         type: DataTypes.STRING(500),
-        allowNull: false,
-      },
-      taluka: {
-        type: DataTypes.STRING(20),
         allowNull: false,
       },
       district: {
@@ -74,7 +70,7 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       dob: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       gender: {

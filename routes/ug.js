@@ -22,6 +22,7 @@ router.post(
     { name: "aadhar", maxCount: 1 },
     { name: "thalassemia", maxCount: 1 },
     { name: "caste_certificate", maxCount: 1 },
+    { name: "ph_certificate", maxCount: 1 },
   ]),
   async (req, res, next) => {
     try {
@@ -136,6 +137,10 @@ router.get("/", async (req, res, next) => {
           as: "addedBy",
           attributes: ["id", "name", "role"],
         },
+        {
+          model: models.stream,
+          as: "stream",
+        },
       ],
     });
     res.status(200).json({ data });
@@ -195,7 +200,13 @@ router.put(
     try {
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
-      if (isExists.stream !== req.body.stream || isExists.semester !== req.body.semester || isExists.name !== req.body.name || isExists.surname !== req.body.surname || isExists.aadhar_number !== req.body.aadhar_number) {
+      if (
+        isExists.stream !== req.body.stream ||
+        isExists.semester !== req.body.semester ||
+        isExists.name !== req.body.name ||
+        isExists.surname !== req.body.surname ||
+        isExists.aadhar_number !== req.body.aadhar_number
+      ) {
         console.log("inside if");
         const newpath = path.join(
           __dirname,
@@ -244,7 +255,7 @@ router.get("/verify/:token", async (req, res, next) => {
   }
 });
 async function handleFiles(req, ugId) {
-  const userDirName = `${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`; 
+  const userDirName = `${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`;
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
     const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;

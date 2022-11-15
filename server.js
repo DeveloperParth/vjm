@@ -9,6 +9,7 @@ const checkAdmin = require("./middlewares/checkAdmin");
 app.use(cors());
 
 if (process.env.NODE_ENV !== "production") {
+  app.use(require("morgan")("dev"));
   require("dotenv").config();
 }
 const port = process.env.PORT || 3000;
@@ -26,7 +27,7 @@ app.use("/seed", require("./routes/seed"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/bin", checkAdmin, require("./routes/bin"));
 app.use("/api/suggestions", require("./routes/suggestions"));
-app.use("/api/admission/stream", require("./routes/stream"));
+app.use("/api/stream", require("./routes/stream"));
 app.use("/api/admission/ug", require("./routes/ug"));
 app.use("/api/admission/pg", require("./routes/pg"));
 

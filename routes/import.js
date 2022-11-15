@@ -2,12 +2,23 @@ const router = require("express").Router();
 const { models } = require("../config/db");
 const checkStaff = require("./../middlewares/checkStaff");
 
+const BaseError = require("../utils/BaseError");
+
 router.post("/import/ug", checkStaff, async (req, res, next) => {
   try {
     const data = req.body.data;
-    console.log(req.body.data[0].dob);
+    const streams = await models.stream.findAll();
     data.map((record) => {
       record.addedBy = res.locals.user.id;
+      const stream = streams.find(
+        (stream) => stream.name === record.stream.toUpperCase()
+      );
+      if (!stream)
+        throw new BaseError(
+          400,
+          `Invalid Stream '${record.stream}', please create the stream first`
+        );
+      record.streamId = stream.id;
       return record;
     });
     const response = await models.ug.bulkCreate(data, {

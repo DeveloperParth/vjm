@@ -15,9 +15,15 @@ module.exports = function (sequelize) {
         "PHOTO",
         "AADHAR",
         "CASTE_CERTIFICATE",
-        "THALASSEMIA"
+        "THALASSEMIA",
+        "PH_CERTIFICATE",
+        "ALL_MARKSHEETS"
       ),
       allowNull: false,
+    },
+    isLatest: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     path: {
       type: DataTypes.STRING,

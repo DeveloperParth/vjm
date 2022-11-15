@@ -1,5 +1,4 @@
-const { array } = require("joi");
-const { DataTypes, Sequelize } = require("sequelize");
+const { DataTypes } = require("sequelize");
 module.exports = function (sequelize) {
   return sequelize.define(
     "ug",
@@ -38,10 +37,10 @@ module.exports = function (sequelize) {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      stream: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-      },
+      // stream: {
+      //   type: DataTypes.STRING(20),
+      //   allowNull: true,
+      // },
       year: {
         type: DataTypes.STRING(20),
         allowNull: true,
