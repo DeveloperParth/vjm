@@ -158,6 +158,10 @@ router.get("/:id", async (req, res, next) => {
           as: "addedBy",
           attributes: ["id", "name", "role"],
         },
+        {
+          model: models.stream,
+          as: "stream",
+        }
       ],
     });
     if (!response) throw new BaseError(404, "Not found");
