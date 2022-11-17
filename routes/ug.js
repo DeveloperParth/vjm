@@ -162,6 +162,10 @@ router.get("/:id", async (req, res, next) => {
           model: models.stream,
           as: "stream",
         },
+        {
+          model: models.stream,
+          as: "stream",
+        },
       ],
     });
     if (!response) throw new BaseError(404, "Not found");
