@@ -115,4 +115,12 @@ async function refreshDb() {
     name: "Staff",
     role: "STAFF",
   });
+  await sequelize.models.stream.create({
+    name: "BCA",
+    type: "UG",
+  });
+  await sequelize.models.stream.create({
+    name: "BBA",
+    type: "UG",
+  });
 }

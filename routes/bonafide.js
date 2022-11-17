@@ -1,28 +1,27 @@
 const router = require("express").Router();
 
-const { models } = require("./../config/db");
+const { models, fn, col } = require("./../config/db");
 
 const checkStaff = require("./../middlewares/checkStaff");
 
 const BaseError = require("./../utils/BaseError");
 
-router.get("/:type/:id", async (req, res, next) => {
+router.get("/:type/", async (req, res, next) => {
   try {
+    if (!(req.params.type === "ug" || req.params.type === "pg"))
+      throw new BaseError(400, `Invalid type '${req.params.type}'`);
     const data = await models.bonafide.findAll({
-      where: {
-        [req.params.type + "Id"]: req.params.id,
-      },
-
       include: [
         {
           model: models.user,
           as: "addedBy",
-          attributes: ["id", "name", "role"],
+          attributes: ["id", "name", "email"],
         },
-        // {
-        //   model: models[req.params.type],
-        // },
+        {
+          model: models[req.params.type],
+        },
       ],
+      group: [`${req.params.type}Id`],
     });
     if (!data) throw new BaseError(404, "Not found");
     return res.status(200).json({ data });
@@ -31,11 +30,13 @@ router.get("/:type/:id", async (req, res, next) => {
   }
 });
 
-router.post("/:id", checkStaff, async (req, res, next) => {
+router.post("/:type/:id", checkStaff, async (req, res, next) => {
   try {
+    const idName = req.params.type.toLowerCase() === "ug" ? "ugId" : "pgId";
     await models.bonafide.create({
-      ugId: req.params.id,
+      [idName]: req.params.id,
       addedById: res.locals.user.id,
+      type: req.params.type,
     });
     return res.status(200).json({ message: "Bonafide created successfully" });
   } catch (error) {

@@ -7,5 +7,9 @@ module.exports = function (sequelize) {
       allowNull: false,
       primaryKey: true,
     },
+    type: {
+      type: DataTypes.ENUM("UG", "PG"),
+      allowNull: false,
+    },
   });
 };
