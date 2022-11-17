@@ -1,10 +1,8 @@
 const router = require("express").Router();
-const { Op } = require("sequelize");
 const { models } = require("./../config/db");
-const sequelize = require("./../config/db");
 const checkStaff = require("./../middlewares/checkStaff");
 
-router.get("/", async (req, res, next) => {
+router.get("/", checkStaff, async (req, res, next) => {
   try {
     const year = new Date().getFullYear();
     const ug = await models.ug.count();
@@ -14,47 +12,115 @@ router.get("/", async (req, res, next) => {
         role: "STAFF",
       },
     });
-    const attributes = ["name", "id", "type"];
-    const currentData = await models.stream.count({
-      attributes,
-      include: [
-        {
-          model: models["stream.type"],
-          where: {
-            year: 2021,
-          },
-        },
-      ],
-      group: ["stream.name"],
-    });
-
-    const oldData = await models.stream.count({
-      attributes,
+    const ugCurrentData = await models.stream.count({
+      where: {
+        type: "UG",
+      },
       include: [
         {
           model: models.ug,
-          required: false,
-        },
-        {
-          model: models.pg,
-          required: false,
+          where: {
+            year,
+          },
         },
       ],
-      group: ["stream.name"],
+      group: ["name"],
     });
-    console.log(currentData);
-    oldData.map((item) => {
-      // item.all = item.count;
-      item.current = currentData.find((i) => i.id === item.id)?.count ?? 0;
-      return item;
+    const ugAllData = await models.stream.count({
+      where: {
+        type: "UG",
+      },
+      include: ["ugs"],
+      group: ["name"],
     });
-    res.status(200).json({ data: { ug, pg, staff, streams: currentData } });
 
-    // return res.status(200).json({ data: { ug, pg, staff } });
+    const pgCurrentData = await models.stream.count({
+      where: {
+        type: "PG",
+      },
+      include: [
+        {
+          model: models.pg,
+          where: {
+            year,
+          },
+        },
+      ],
+      group: ["name"],
+    });
+    const pgAllData = await models.stream.count({
+      where: {
+        type: "PG",
+      },
+      include: ["pgs"],
+      group: ["name"],
+    });
+    const streams = [];
+    ugAllData.map((stream) => {
+      streams.push({
+        name: stream.name,
+        all: stream.count,
+        current: ugCurrentData.find((s) => s.name === stream.name)?.count ?? 0,
+      });
+    });
+    pgAllData.map((stream) => {
+      streams.push({
+        all: pgCurrentData.find((s) => s.name === stream.name)?.count ?? 0,
+        current: stream.count,
+      });
+    });
+
+    res.status(200).json({ data: { ug, pg, staff, streams } });
   } catch (error) {
     next(error);
   }
 });
+
+// const attributes = ["name", "id", "type"];
+
+// const currentData = await models.stream.count({
+//   // attributes,
+
+//   include: [
+//     {
+//       model: models.ug,
+//       required: false,
+//       where: {
+//         year,
+//       },
+//     },
+//     {
+
+//       model: models.pg,
+//       required: false,
+//       where: {
+//         year,
+//       },
+//     },
+//   ],
+//   group: ["name"],
+// });
+
+// const oldData = await models.stream.count({
+//   attributes,
+//   include: [
+//     {
+//       model: models.ug,
+//       required: false,
+//     },
+//     {
+//       model: models.pg,
+//       required: false,
+//     },
+//   ],
+//   group: ["name"],
+// });
+// console.log(currentData);
+// oldData.map((item) => {
+//   // item.all = item.count;
+//   item.current = currentData.find((i) => i.id === item.id)?.count ?? 0;
+//   return item;
+// });
 
 // const options = {
 //   include: [
