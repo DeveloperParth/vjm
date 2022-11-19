@@ -2,14 +2,14 @@ const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
   dialectOptions:
-  // process.env.NODE_ENV === "production"?
-  {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  }
-  ,
+    process.env.NODE_ENV === "production"
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -91,7 +91,7 @@ function applyExtraSetup(sequelize) {
   });
 }
 applyExtraSetup(sequelize);
-// refreshDb();
+refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {

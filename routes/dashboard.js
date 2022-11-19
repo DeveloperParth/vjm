@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { models } = require("./../config/db");
 const checkStaff = require("./../middlewares/checkStaff");
 
-router.get("/", checkStaff, async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const year = new Date().getFullYear();
     const ug = await models.ug.count();
@@ -12,7 +12,10 @@ router.get("/", checkStaff, async (req, res, next) => {
         role: "STAFF",
       },
     });
+    const attributes = ["name", "type", "id"];
+    const group = ["name", "id"];
     const ugCurrentData = await models.stream.count({
+      attributes,
       where: {
         type: "UG",
       },
@@ -24,17 +27,19 @@ router.get("/", checkStaff, async (req, res, next) => {
           },
         },
       ],
-      group: ["name"],
+      group,
     });
     const ugAllData = await models.stream.count({
+      attributes,
       where: {
         type: "UG",
       },
       include: ["ugs"],
-      group: ["name"],
+      group,
     });
 
     const pgCurrentData = await models.stream.count({
+      attributes,
       where: {
         type: "PG",
       },
@@ -46,18 +51,21 @@ router.get("/", checkStaff, async (req, res, next) => {
           },
         },
       ],
-      group: ["name"],
+      group,
     });
     const pgAllData = await models.stream.count({
+      attributes,
       where: {
         type: "PG",
       },
       include: ["pgs"],
-      group: ["name"],
+      group,
     });
     const streams = [];
     ugAllData.map((stream) => {
       streams.push({
+        id: stream.id,
+        type: stream.type,
         name: stream.name,
         all: stream.count,
         current: ugCurrentData.find((s) => s.name === stream.name)?.count ?? 0,
@@ -65,6 +73,8 @@ router.get("/", checkStaff, async (req, res, next) => {
     });
     pgAllData.map((stream) => {
       streams.push({
+        id: stream.id,
+        type: stream.type,
         all: pgCurrentData.find((s) => s.name === stream.name)?.count ?? 0,
         current: stream.count,
       });

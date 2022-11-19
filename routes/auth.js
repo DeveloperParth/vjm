@@ -33,6 +33,40 @@ router.post("/auth/login", async (req, res, next) => {
     next(error);
   }
 });
+router.post("/auth/student/login", async (req, res, next) => {
+  try {
+    const { email: sid, password } = req.body;
+    let type = "ug";
+    12;
+    console.log(req.body);
+    if (!(sid && password))
+      throw new BaseError(400, "Student ID and password are required");
+
+    let user = await models.ug.findOne({
+      where: {
+        sid,
+        password,
+      },
+    });
+    if (!user) {
+      user = await models.pg.findOne({
+        where: {
+          sid,
+          password,
+        },
+      });
+      type = "pg";
+    }
+    if (!user) throw new BaseError(401, "Student ID or password is wrong");
+    const { password: _, ...restUser } = user.dataValues;
+    const token = jwt.sign({ id: user.id, type }, process.env.JWT_SECRET);
+    return res
+      .status(200)
+      .json({ user: { ...restUser, type, role: "STUDENT" }, token });
+  } catch (error) {
+    next(error);
+  }
+});
 router.post("/user/create", checkAdmin, async (req, res, next) => {
   try {
     const { email, name, role } = req.body;
@@ -61,8 +95,7 @@ router.post("/user/create", checkAdmin, async (req, res, next) => {
     });
     user.forgotToken = token;
     await user.save();
-    // const link = `${process.env.FRONTEND_URL}/forgot/${token}`;
-    const link = `https://vjm-admission.herokuapp.com/forgot/${token}`;
+    const link = `${process.env.FRONTEND_URL}/forgot/${token}`;
     console.log(link);
     sendPasswordMail(email, password, link);
 
@@ -105,7 +138,7 @@ router.post("/auth/change-password", checkStaff, async (req, res, next) => {
     console.log(oldPassword);
     if (!user) throw new BaseError(404);
     const isSame = bcrypt.compareSync(oldPassword, user.password);
-    if (!isSame) throw new BaseError(403, "Password is incorrect");
+    if (!isSame) throw new BaseError(403, "Old password is incorrect");
     user.password = bcrypt.hashSync(newPassword, 10);
     await user.save();
     return res.status(200).json({

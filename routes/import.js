@@ -10,19 +10,29 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
     const streams = await models.stream.findAll();
     data.map((record) => {
       record.addedById = res.locals.user.id;
+      const streamNameToCheckAgainst = (
+        record.medium ? `${record.stream}_${record.medium}` : record.stream
+      ).toUpperCase();
       const stream = streams.find(
-        (stream) => stream.name === record.stream.toUpperCase()
+        (stream) => stream.name === streamNameToCheckAgainst
       );
       if (!stream)
         throw new BaseError(
           400,
-          `Invalid Stream '${record.stream}', please create the stream first`
+          `Invalid Stream '${streamNameToCheckAgainst}', please create the stream first`
         );
       record.streamId = stream.id;
-      record.physcal_disability = convertYandN(
-        record.physcal_disability,
-        { Y: "YES", N: "NO" },
-      );
+      record.physcal_disability = convertYandN(record.physcal_disability, {
+        Y: "YES",
+        N: "NO",
+      });
+      record.gender = convertYandN(record.gender, {
+        M: "MALE",
+        F: "FEMALE",
+        m: "MALE",
+        f: "FEMALE",
+      });
+      record.isVerified = record.isVerified ?? true;
       return record;
     });
     const response = await models.ug.bulkCreate(data, {
