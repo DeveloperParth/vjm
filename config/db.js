@@ -2,14 +2,14 @@ const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
   dialectOptions:
-    process.env.NODE_ENV === "production"
-      ? {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false,
-          },
-        }
-      : {},
+  // process.env.NODE_ENV === "production"?
+  {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  }
+  ,
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -71,25 +71,22 @@ function applyExtraSetup(sequelize) {
   bonafide.belongsTo(ug, {
     constraints: false,
   });
-  ug.hasMany(bonafide, {
-    constraints: false,
-  });
+  // ug.hasMany(bonafide, {
+  //   constraints: false,
+  // });
 
   // bona fide relationship with pg
   bonafide.belongsTo(pg, {
     constraints: false,
   });
-  pg.hasMany(bonafide, {
-    constraints: false,
-  });
+  // pg.hasMany(bonafide, {
+  //   constraints: false,
+  // });
 
   // bona fide relationship with user
   bonafide.belongsTo(user, {
     as: "addedBy",
     foreignKey: "addedById",
-    constraints: false,
-  });
-  user.hasMany(bonafide, {
     constraints: false,
   });
 }

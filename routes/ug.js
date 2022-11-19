@@ -215,7 +215,6 @@ router.put(
         isExists.surname !== req.body.surname ||
         isExists.aadhar_number !== req.body.aadhar_number
       ) {
-        console.log("inside if");
         const newpath = path.join(
           __dirname,
           `../uploads/${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aaadhar_number}`
@@ -224,7 +223,7 @@ router.put(
           __dirname,
           `../uploads/${isExists.stream}-${isExists.semester}-${isExists.name} ${isExists.surname}-${isExists.aadhar_number}`
         );
-        fs.renameSync(oldpath, newpath);
+        fs.existsSync(oldpath) && fs.renameSync(oldpath, newpath);
       }
       await models.ug.update(
         {

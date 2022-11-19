@@ -11,5 +11,9 @@ module.exports = function (sequelize) {
       type: DataTypes.ENUM("UG", "PG"),
       allowNull: false,
     },
+    count: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   });
 };

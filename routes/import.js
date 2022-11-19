@@ -9,7 +9,7 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
     const data = req.body.data;
     const streams = await models.stream.findAll();
     data.map((record) => {
-      record.addedBy = res.locals.user.id;
+      record.addedById = res.locals.user.id;
       const stream = streams.find(
         (stream) => stream.name === record.stream.toUpperCase()
       );
@@ -19,6 +19,10 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
           `Invalid Stream '${record.stream}', please create the stream first`
         );
       record.streamId = stream.id;
+      record.physcal_disability = convertYandN(
+        record.physcal_disability,
+        { Y: "YES", N: "NO" },
+      );
       return record;
     });
     const response = await models.ug.bulkCreate(data, {
@@ -61,5 +65,12 @@ router.post("/import/pg", async (req, res, next) => {
     next(error);
   }
 });
-
+function convertYandN(value, valuesToMap) {
+  Object.keys(valuesToMap).map((key) => {
+    if (value === key) {
+      value = valuesToMap[key];
+    }
+  });
+  return value;
+}
 module.exports = router;

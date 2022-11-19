@@ -1,5 +1,6 @@
 const router = require("express").Router();
 
+const { Op } = require("sequelize");
 const { models, fn, col } = require("./../config/db");
 
 const checkStaff = require("./../middlewares/checkStaff");
@@ -10,6 +11,8 @@ router.get("/:type/", async (req, res, next) => {
   try {
     if (!(req.params.type === "ug" || req.params.type === "pg"))
       throw new BaseError(400, `Invalid type '${req.params.type}'`);
+
+    const query = req.query.search
     const data = await models.bonafide.findAll({
       include: [
         {
@@ -18,10 +21,14 @@ router.get("/:type/", async (req, res, next) => {
           attributes: ["id", "name", "email"],
         },
         {
-          model: models[req.params.type],
-        },
+          model: models.ug,
+          where: query ? {
+            name: {
+              [Op.like]: `%${query}%`
+            }
+          } : {},
+        }
       ],
-      group: [`${req.params.type}Id`],
     });
     if (!data) throw new BaseError(404, "Not found");
     return res.status(200).json({ data });
@@ -33,10 +40,22 @@ router.get("/:type/", async (req, res, next) => {
 router.post("/:type/:id", checkStaff, async (req, res, next) => {
   try {
     const idName = req.params.type.toLowerCase() === "ug" ? "ugId" : "pgId";
+    const isExists = await models.bonafide.findOne({
+      where: {
+        [idName]: req.params.id,
+        type: req.params.type.toUpperCase(),
+      },
+    });
+    if (isExists) {
+      isExists.count = isExists.count + 1;
+      await isExists.save();
+      return res.status(200).json({ message: "Bonafide created successfully" });
+    }
     await models.bonafide.create({
       [idName]: req.params.id,
       addedById: res.locals.user.id,
       type: req.params.type,
+      count: 1
     });
     return res.status(200).json({ message: "Bonafide created successfully" });
   } catch (error) {
