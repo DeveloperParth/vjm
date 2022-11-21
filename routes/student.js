@@ -37,7 +37,7 @@ router.post("/bonafide", checkStudent, async (req, res, next) => {
     const isExists = await models.bonafide.findOne({
       where: {
         [idName]: res.locals.user.id,
-        type: res.locals.user.BaseErrortype.toUpperCase(),
+        type: res.locals.user.type.toUpperCase(),
       },
     });
     if (isExists) {
