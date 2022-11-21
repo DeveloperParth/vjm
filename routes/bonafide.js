@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const { Op } = require("sequelize");
+const checkStudent = require("../middlewares/checkStudent");
 const { models, fn, col } = require("./../config/db");
 
 const checkStaff = require("./../middlewares/checkStaff");
@@ -12,7 +13,7 @@ router.get("/:type/", async (req, res, next) => {
     if (!(req.params.type === "ug" || req.params.type === "pg"))
       throw new BaseError(400, `Invalid type '${req.params.type}'`);
 
-    const query = req.query.search
+    const query = req.query.search;
     const data = await models.bonafide.findAll({
       include: [
         {
@@ -22,12 +23,14 @@ router.get("/:type/", async (req, res, next) => {
         },
         {
           model: models.ug,
-          where: query ? {
-            name: {
-              [Op.like]: `%${query}%`
-            }
-          } : {},
-        }
+          where: query
+            ? {
+                name: {
+                  [Op.like]: `%${query}%`,
+                },
+              }
+            : {},
+        },
       ],
     });
     if (!data) throw new BaseError(404, "Not found");
@@ -48,6 +51,7 @@ router.post("/:type/:id", checkStaff, async (req, res, next) => {
     });
     if (isExists) {
       isExists.count = isExists.count + 1;
+      isExists.purpose = req.body.purpose;
       await isExists.save();
       return res.status(200).json({ message: "Bonafide created successfully" });
     }
@@ -55,7 +59,8 @@ router.post("/:type/:id", checkStaff, async (req, res, next) => {
       [idName]: req.params.id,
       addedById: res.locals.user.id,
       type: req.params.type,
-      count: 1
+      purpose: req.body.purpose,
+      count: 1,
     });
     return res.status(200).json({ message: "Bonafide created successfully" });
   } catch (error) {

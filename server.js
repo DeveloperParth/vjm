@@ -25,6 +25,7 @@ app.use("/api", require("./routes/auth"));
 app.use("/api", require("./routes/import"));
 app.use("/seed", require("./routes/seed"));
 app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/student", require("./routes/student"));
 app.use("/api/bonafide", require("./routes/bonafide"));
 app.use("/api/bin", checkAdmin, require("./routes/bin"));
 app.use("/api/suggestions", require("./routes/suggestions"));

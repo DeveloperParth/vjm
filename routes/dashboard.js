@@ -2,7 +2,7 @@ const router = require("express").Router();
 const { models } = require("./../config/db");
 const checkStaff = require("./../middlewares/checkStaff");
 
-router.get("/", async (req, res, next) => {
+router.get("/", checkStaff, async (req, res, next) => {
   try {
     const year = new Date().getFullYear();
     const ug = await models.ug.count();

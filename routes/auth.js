@@ -59,7 +59,10 @@ router.post("/auth/student/login", async (req, res, next) => {
     }
     if (!user) throw new BaseError(401, "Student ID or password is wrong");
     const { password: _, ...restUser } = user.dataValues;
-    const token = jwt.sign({ id: user.id, type }, process.env.JWT_SECRET);
+    const token = jwt.sign(
+      { id: user.id, type, role: "STUDENT" },
+      process.env.JWT_SECRET
+    );
     return res
       .status(200)
       .json({ user: { ...restUser, type, role: "STUDENT" }, token });
