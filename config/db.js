@@ -91,7 +91,7 @@ function applyExtraSetup(sequelize) {
   });
 }
 applyExtraSetup(sequelize);
-// refreshDb();
+refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {
@@ -118,6 +118,34 @@ async function refreshDb() {
   });
   await sequelize.models.stream.create({
     name: "BBA",
+    type: "UG",
+  });
+  await sequelize.models.stream.create({
+    name: "BSC",
+    type: "PG",
+  });
+  await sequelize.models.stream.create({
+    name: "BSW",
+    type: "UG",
+  });
+  await sequelize.models.stream.create({
+    name: "MCOM",
+    type: "PG",
+  });
+  await sequelize.models.stream.create({
+    name: "MSCCHEM",
+    type: "PG",
+  });
+  await sequelize.models.stream.create({
+    name: "MSCIT",
+    type: "PG",
+  });
+  await sequelize.models.stream.create({
+    name: "PGDCA",
+    type: "PG",
+  });
+  await sequelize.models.stream.create({
+    name: "BCOM",
     type: "UG",
   });
 }

@@ -10,15 +10,15 @@ module.exports = function (sequelize) {
         primaryKey: true,
       },
       name: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       surname: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       sid: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       isVerified: {
@@ -26,7 +26,7 @@ module.exports = function (sequelize) {
         defaultValue: false,
       },
       enrollment: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       password: {
@@ -38,19 +38,19 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       // stream: {
-      //   type: DataTypes.STRING(20),
+      //   type: DataTypes.STRING,
       //   allowNull: true,
       // },
       year: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       father_name: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       mother_name: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       address: {
@@ -58,27 +58,27 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       district: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       city: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       pincode: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       state: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       whatsapp_mobile: {
-        type: DataTypes.STRING(13),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       father_mobile: {
-        type: DataTypes.STRING(13),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       dob: {
@@ -86,27 +86,27 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       gender: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       birth_place: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       physical_disability: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       disease: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       category: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       minority: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       religion: {
@@ -126,7 +126,7 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       aadhar_number: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
         unique: true,
       },
@@ -139,7 +139,7 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       hsc_stream: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_seat: {
@@ -147,11 +147,11 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       hsc_passing_year: {
-        type: DataTypes.STRING(4),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_month: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_attempt: {
@@ -159,23 +159,23 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       hsc_total: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_obtained: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_percentage: {
-        type: DataTypes.DECIMAL(5, 2),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_percentile: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_grade: {
-        type: DataTypes.STRING(10),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_board: {

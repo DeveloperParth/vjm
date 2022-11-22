@@ -21,10 +21,18 @@ module.exports = function (sequelize) {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      // tream: {
-      //   type: DataTypes.STRING(20),
-      //   allowNull: false,
-      // },s
+      sid: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      enrollment: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       year: {
         type: DataTypes.STRING(20),
         allowNull: false,

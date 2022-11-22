@@ -8,10 +8,12 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
   try {
     const data = req.body.data;
     const streams = await models.stream.findAll();
-    data.map((record) => {
+    data.map((record, i) => {
       record.addedById = res.locals.user.id;
       const streamNameToCheckAgainst = (
-        record.medium ? `${record.stream}_${record.medium}` : record.stream
+        record.medium
+          ? `${record.stream.replaceAll(".", "")}_${record.medium}`
+          : record.stream.replaceAll(".", "")
       ).toUpperCase();
       const stream = streams.find(
         (stream) => stream.name === streamNameToCheckAgainst
@@ -33,6 +35,7 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
         f: "FEMALE",
       });
       record.isVerified = record.isVerified ?? true;
+      console.log(i);
       return record;
     });
     const response = await models.ug.bulkCreate(data, {
