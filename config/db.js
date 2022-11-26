@@ -19,13 +19,14 @@ const modelDefiners = [
   require("../models/User"),
   require("../models/Stream"),
   require("../models/Bonafide"),
+  require("../models/TC"),
 ];
 
 for (const modelDefiner of modelDefiners) {
   modelDefiner(sequelize);
 }
 function applyExtraSetup(sequelize) {
-  const { ug, ugPhotos, pg, pgPhotos, user, stream, bonafide } =
+  const { ug, ugPhotos, pg, pgPhotos, user, stream, bonafide, tc } =
     sequelize.models;
 
   //define relationship: ug has a stream and stream has many ugs
@@ -67,24 +68,35 @@ function applyExtraSetup(sequelize) {
     constraints: false,
   });
 
-  // bona fide relationship with ug
+  // bona fide relationship
   bonafide.belongsTo(ug, {
     constraints: false,
   });
-  // ug.hasMany(bonafide, {
-  //   constraints: false,
-  // });
-
-  // bona fide relationship with pg
   bonafide.belongsTo(pg, {
     constraints: false,
   });
-  // pg.hasMany(bonafide, {
-  //   constraints: false,
-  // });
-
-  // bona fide relationship with user
   bonafide.belongsTo(user, {
+    as: "addedBy",
+    foreignKey: "addedById",
+    constraints: false,
+  });
+
+  // tc relationship
+  tc.belongsTo(ug, {
+    constraints: false,
+  });
+  ug.hasOne(tc, {
+    constraints: false,
+  });
+
+  tc.belongsTo(pg, {
+    constraints: false,
+  });
+  pg.hasOne(tc, {
+    constraints: false,
+  });
+
+  tc.belongsTo(user, {
     as: "addedBy",
     foreignKey: "addedById",
     constraints: false,

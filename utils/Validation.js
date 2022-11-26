@@ -139,4 +139,13 @@ const pgSchema = joi
   })
   .options({ allowUnknown: true });
 
-module.exports = { ugSchema, pgSchema };
+const tcSchema = joi
+  .object({
+    id: joi.number().integer().min(1),
+    seatNo: joi.string().required(),
+    examDate: joi.string().required(),
+    universityName: joi.string().required(),
+    specialNote: joi.string().required(),
+  })
+  .options({ allowUnknown: true });
+module.exports = { ugSchema, pgSchema, tcSchema };

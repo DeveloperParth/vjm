@@ -14,7 +14,9 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
         record.medium
           ? `${record.stream.replaceAll(".", "")}_${record.medium}`
           : record.stream.replaceAll(".", "")
-      ).toUpperCase();
+      )
+        .toUpperCase()
+        .trim();
       const stream = streams.find(
         (stream) => stream.name === streamNameToCheckAgainst
       );
@@ -23,7 +25,9 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
           400,
           `Invalid Stream '${streamNameToCheckAgainst}', please create the stream first`
         );
-      record.streamId = stream.id;
+      // if (stream.type !== "UG")
+      //   throw new BaseError(400, `PG records cannot be imported in UG`);
+
       record.physcal_disability = convertYandN(record.physcal_disability, {
         Y: "YES",
         N: "NO",
@@ -34,8 +38,18 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
         m: "MALE",
         f: "FEMALE",
       });
-      record.isVerified = record.isVerified ?? true;
-      console.log(i);
+      record.whatsapp_mobile = formatNumber(record.whatsapp_mobile);
+      console.log(formatNumber(record.whatsapp_mobile));
+      record.father_mobile = formatNumber(record.father_mobile);
+
+      record.state ||= "Gujarat";
+      record.semester ||= 1;
+      record.physcal_disability ||= "NO";
+      record.minority ||= "NO";
+      record.religion ||= "Hindu";
+      record.city ||= "Porbandar";
+      record.streamId = stream.id;
+      record.isVerified ||= true;
       return record;
     });
     const response = await models.ug.bulkCreate(data, {
@@ -79,11 +93,13 @@ router.post("/import/pg", async (req, res, next) => {
   }
 });
 function convertYandN(value, valuesToMap) {
-  Object.keys(valuesToMap).map((key) => {
-    if (value === key) {
-      value = valuesToMap[key];
-    }
-  });
-  return value;
+  if (!value) return value;
+  return valuesToMap[value.trim()];
+}
+function formatNumber(value) {
+  if (!value) return value;
+  if (value.length === 10) return value;
+  if (value.includes(",")) return value.split(",")[0];
+  return value.split(" ")[0];
 }
 module.exports = router;

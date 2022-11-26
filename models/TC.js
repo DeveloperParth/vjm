@@ -1,11 +1,20 @@
-const sequelize = require("../config/db");
 const { DataTypes } = require("sequelize");
 
-module.exports = sequelize.define("tc", {
-  id: {
-    type: DataTypes.UUID,
-    autoIncrement: true,
-    primaryKey: true,
-    allowNull: false,
-  },
-});
+module.exports = function (sequelize) {
+  return sequelize.define("tc", {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    seatNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    examDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+  });
+};

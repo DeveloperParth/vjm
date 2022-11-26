@@ -10,6 +10,16 @@ router.get("/:type", checkAdmin, async (req, res, next) => {
     if (!(type === "pg" || type === "ug"))
       throw new BaseError(400, "Invalid type of course");
     const data = await models[type].findAll({
+      include: [
+        {
+          model: models.stream,
+          as: "stream",
+        },
+        {
+          model: models.tc,
+        },
+      ],
+
       where: {
         deletedAt: { [Op.not]: null },
       },
