@@ -39,7 +39,7 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
         f: "FEMALE",
       });
       record.whatsapp_mobile = formatNumber(record.whatsapp_mobile);
-      console.log(formatNumber(record.whatsapp_mobile));
+
       record.father_mobile = formatNumber(record.father_mobile);
 
       record.state ||= "Gujarat";

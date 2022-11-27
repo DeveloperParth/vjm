@@ -23,7 +23,7 @@ router.get("/", checkStudent, async (req, res, next) => {
       ],
     });
     if (!user) throw new BaseError();
-    console.log(user);
+
     return res.status(200).json({ data: user.dataValues });
   } catch (error) {
     next(error);

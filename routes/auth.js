@@ -38,7 +38,7 @@ router.post("/auth/student/login", async (req, res, next) => {
     const { email: sid, password } = req.body;
     let type = "ug";
     12;
-    console.log(req.body);
+
     if (!(sid && password))
       throw new BaseError(400, "Student ID and password are required");
 
@@ -99,7 +99,7 @@ router.post("/user/create", checkAdmin, async (req, res, next) => {
     user.forgotToken = token;
     await user.save();
     const link = `${process.env.FRONTEND_URL}/forgot/${token}`;
-    console.log(link);
+
     sendPasswordMail(email, password, link);
 
     return res.status(200).json({
@@ -138,7 +138,7 @@ router.post("/auth/change-password", checkStaff, async (req, res, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
     const user = await models.user.findByPk(res.locals.user.id);
-    console.log(oldPassword);
+
     if (!user) throw new BaseError(404);
     const isSame = bcrypt.compareSync(oldPassword, user.password);
     if (!isSame) throw new BaseError(403, "Old password is incorrect");
@@ -161,8 +161,8 @@ router.post("/forgot", async (req, res, next) => {
     });
     user.forgotToken = token;
     await user.save();
-    const link = `http://localhost:3000/forgot/verify/${token}`;
-    console.log(link);
+    const link = `${process.env.FRONTEND_URL}/forgot/verify/${token}`;
+
     return res.status(200).json({
       message:
         "Please verify your account, An email has been sent to your mail",
@@ -173,10 +173,9 @@ router.post("/forgot", async (req, res, next) => {
 });
 router.post("/forgot/:token", async (req, res, next) => {
   try {
-    console.log("hit");
     const { password } = req.body;
     const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
-    console.log(decoded);
+
     const user = await models.user.findByPk(decoded.id);
     if (!user) throw new BaseError();
     if (user.forgotToken !== req.params.token) throw new BaseError();

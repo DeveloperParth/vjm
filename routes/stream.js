@@ -2,9 +2,10 @@ const router = require("express").Router();
 const { models } = require("../config/db");
 const BaseError = require("../utils/BaseError");
 
+const checkStaff = require("../middlewares/checkStaff");
 const checkAdmin = require("../middlewares/checkAdmin");
 
-router.get("/all", async (req, res, next) => {
+router.get("/all", checkStaff, async (req, res, next) => {
   try {
     const data = await models.stream.findAll();
     res.status(200).json({ data });

@@ -24,7 +24,6 @@ router.post(
   ]),
   async (req, res, next) => {
     try {
-      console.log(req.body.ug_seat);
       await pgSchema.validateAsync(req.body, { abortEarly: true });
       const {
         name,
@@ -187,7 +186,7 @@ router.get("/", async (req, res, next) => {
         },
       ],
     });
-    console.log(data);
+
     res.status(200).json({ data });
   } catch (error) {
     next(error);
@@ -305,6 +304,16 @@ async function handleFiles(req, pgId) {
   if (!fs.existsSync(resolve(userDirPath))) {
     fs.mkdirSync(resolve(userDirPath));
   }
+  req.files.all_marksheet.forEach((file, index) => {
+    const path = checkIfExists(userDirPath, "all_marksheet");
+    fs.renameSync(file.path, resolve(path));
+    models.pgPhotos.create({
+      pgId,
+      type: "all_marksheet",
+      path,
+      isLatest: true,
+    });
+  });
   for (const fileFieldName in req.files) {
     const file = req.files[fileFieldName][0];
     const oldpath = file.path;

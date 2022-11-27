@@ -1,7 +1,6 @@
 const nodemailer = require("nodemailer");
 const hbs = require("nodemailer-express-handlebars");
 
-console.log(process.env.MAIL_USER);
 const transporter = nodemailer.createTransport({
   // host: "smtp.zoho.in",
   host: "smtp.gmail.com",
@@ -51,8 +50,6 @@ function sendPasswordMail(email, password, link) {
       if (error) {
         throw error;
       }
-      console.log("Message sent: %s", info.messageId);
-      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     }
   );
 }
@@ -74,7 +71,6 @@ function sendDataVerificationMail(email, data, link) {
       if (error) {
         throw error;
       }
-      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     }
   );
 }
