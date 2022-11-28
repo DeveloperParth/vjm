@@ -8,8 +8,8 @@ const checkAdmin = require("./middlewares/checkAdmin");
 
 app.use(cors());
 
+app.use(require("morgan")("dev"));
 if (process.env.NODE_ENV !== "production") {
-  app.use(require("morgan")("dev"));
   require("dotenv").config();
 }
 const port = process.env.PORT || 3000;
