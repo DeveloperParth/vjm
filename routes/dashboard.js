@@ -37,9 +37,6 @@ router.get("/", async (req, res, next) => {
       })
     );
 
-    const attributes = ["name", "type", "id"];
-    const group = ["id"];
-
     res.status(200).json({ data: { ug, pg, staff, streams } });
   } catch (error) {
     next(error);
