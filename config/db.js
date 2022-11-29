@@ -103,7 +103,7 @@ function applyExtraSetup(sequelize) {
   });
 }
 applyExtraSetup(sequelize);
-refreshDb();
+// refreshDb();
 module.exports = sequelize;
 
 async function refreshDb() {

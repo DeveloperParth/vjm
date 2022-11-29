@@ -8,8 +8,8 @@ const jwt = require("jsonwebtoken");
 const { sendDataVerificationMail } = require("../utils/Mail");
 const { resolve } = require("path");
 const { ugSchema } = require("../utils/Validation");
-const Joi = require("joi");
 const path = require("path");
+const { Op, where: Where, fn, col } = require("sequelize");
 
 router.post(
   "/",
@@ -130,7 +130,17 @@ router.post(
 
 router.get("/", async (req, res, next) => {
   try {
-    const data = await models.ug.findAll({
+    const { page = 1, limit = 10, search, field } = req.query;
+    const offset = (page - 1) * limit;
+    const where = {};
+    if (search && field && field !== "stream") {
+      where[field] = Where(
+        fn("LOWER", col(`ug.${field}`)),
+        "LIKE",
+        `%${search.toLowerCase()}%`
+      );
+    }
+    const data = await models.ug.findAndCountAll({
       include: [
         {
           model: models.user,
@@ -140,8 +150,16 @@ router.get("/", async (req, res, next) => {
         {
           model: models.stream,
           as: "stream",
+          where:
+            search && field === "stream"
+              ? { name: { [Op.like]: `%${search.toUpperCase()}%` } }
+              : {},
         },
       ],
+      where,
+      order: [["createdAt", "DESC"]],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
     });
     res.status(200).json({ data });
   } catch (error) {

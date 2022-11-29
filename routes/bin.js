@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { models } = require("../config/db");
-const Op = require("sequelize").Op;
+const { Op, where: Where, fn, col } = require("sequelize");
 const checkAdmin = require("../middlewares/checkAdmin");
 const BaseError = require("../utils/BaseError");
 
@@ -9,21 +9,39 @@ router.get("/:type", checkAdmin, async (req, res, next) => {
     const type = req.params.type;
     if (!(type === "pg" || type === "ug"))
       throw new BaseError(400, "Invalid type of course");
-    const data = await models[type].findAll({
+
+    const { search, field, limit, page } = req.query;
+    const offset = (page - 1) * limit;
+    const where = {
+      deletedAt: { [Op.not]: null },
+    };
+    if (search && field && field !== "stream") {
+      where[field] = Where(
+        fn("LOWER", col(`${type}.${field}`)),
+        "LIKE",
+        `%${search.toLowerCase()}%`
+      );
+    }
+
+    const data = await models[type].findAndCountAll({
       include: [
         {
           model: models.stream,
           as: "stream",
+          where:
+            search && field === "stream"
+              ? { name: { [Op.like]: `%${search.toUpperCase()}%` } }
+              : {},
         },
         {
           model: models.tc,
         },
       ],
-
-      where: {
-        deletedAt: { [Op.not]: null },
-      },
+      where,
       paranoid: false,
+      order: [["createdAt", "DESC"]],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
     });
     return res.status(200).json({ data });
   } catch (error) {

@@ -3,6 +3,7 @@ const upload = require("../middlewares/Upload");
 const BaseError = require("../utils/BaseError");
 const checkStaff = require("./../middlewares/checkStaff");
 const fs = require("fs");
+const { Op, where: Where, fn, col } = require("sequelize");
 const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
 const { sendDataVerificationMail } = require("../utils/Mail");
@@ -177,14 +178,36 @@ router.post(
 
 router.get("/", async (req, res, next) => {
   try {
-    const data = await models.pg.findAll({
+    const { page = 1, limit = 10, search, field } = req.query;
+    const offset = (page - 1) * limit;
+    const where = {};
+    if (search && field && field !== "stream") {
+      where[field] = Where(
+        fn("LOWER", col(`pg.${field}`)),
+        "LIKE",
+        `%${search.toLowerCase()}%`
+      );
+    }
+    const data = await models.ug.findAndCountAll({
       include: [
         {
           model: models.user,
           as: "addedBy",
           attributes: ["id", "name", "role"],
         },
+        {
+          model: models.stream,
+          as: "stream",
+          where:
+            search && field === "stream"
+              ? { name: { [Op.like]: `%${search.toUpperCase()}%` } }
+              : {},
+        },
       ],
+      where,
+      order: [["createdAt", "DESC"]],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
     });
 
     res.status(200).json({ data });
