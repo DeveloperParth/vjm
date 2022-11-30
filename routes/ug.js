@@ -141,7 +141,7 @@ router.get("/", async (req, res, next) => {
         `%${search.toLowerCase()}%`
       );
     }
-    const data = await model.ug.findAndCountAll({
+    const data = await models.ug.findAndCountAll({
       include: [
         {
           model: models.user,

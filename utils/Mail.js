@@ -2,11 +2,15 @@ const nodemailer = require("nodemailer");
 const hbs = require("nodemailer-express-handlebars");
 
 const transporter = nodemailer.createTransport({
-  // host: "smtp.zoho.in",
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+
   auth: {
+    // user: "vjmgcs@gmail.com",
+    // pass: "vexgyutbrkvmfikq",
     user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASSWORD,
+    pass: process.env.MAIL_PASSWORD
   },
 });
 
@@ -73,7 +77,6 @@ function sendDataVerificationMail(email, data, link) {
   );
 }
 function sendErrorEmail(email, error) {
-  console.log(process.env.MAIL_PASSWORD);
   transporter.sendMail(
     {
       from: process.env.MAIL_USER,

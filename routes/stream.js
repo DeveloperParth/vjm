@@ -4,6 +4,7 @@ const BaseError = require("../utils/BaseError");
 
 const checkStaff = require("../middlewares/checkStaff");
 const checkAdmin = require("../middlewares/checkAdmin");
+const { Op, DatabaseError } = require("sequelize");
 
 router.get("/all", checkStaff, async (req, res, next) => {
   try {
@@ -13,53 +14,31 @@ router.get("/all", checkStaff, async (req, res, next) => {
     next(error);
   }
 });
-// router.get("/:stream", async (req, res, next) => {
-//   try {
-//     PG_STREAMS = ["MCOM_GUJ", "MCOM_ENG", "MSC_CHE", "MSC_IT"];
-//     UG_STREAMS = ["BBA", "BCA", "BSC", "BCOM_GUJ", "BCOM_ENG", "BSW"];
-//     let data = [];
-//     if (UG_STREAMS.includes(req.params.stream.toUpperCase())) {
-//       data = await models.ug.findAll({
-//         where: {
-//           stream: req.params.stream,
-//         },
-//         include: [
-//           {
-//             model: models.user,
-//             as: "addedBy",
-//             attributes: ["id", "name", "role"],
-//           },
-//         ],
-//       });
-//     } else if (PG_STREAMS.includes(req.params.stream)) {
-//       data = await models.pg.findAll({
-//         where: {
-//           stream: req.params.stream,
-//         },
-//         include: [
-//           {
-//             model: models.user,
-//             as: "addedBy",
-//             attributes: ["id", "name", "role"],
-//           },
-//         ],
-//       });
-//     } else {
-//       throw new BaseError("Invalid Stream", 400);
-//     }
-//     res.status(200).json({ data });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", checkStaff, async (req, res, next) => {
+  try {
+    const data = await models.stream.findByPk(req.params.id);
+    if (!data) throw new BaseError("Stream not found", 404);
+    res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+router.get("/:id/data", async (req, res, next) => {
   try {
     const stream = await models.stream.findByPk(req.params.id);
     if (!stream) throw new BaseError(400, "Invalid Stream");
-    const data = await models[stream.type.toLowerCase()].findAll({
-      where: {
-        streamId: stream.id,
-      },
+    const { page = 1, limit = 10, search, field } = req.query;
+    const offset = (page - 1) * limit;
+    const where = {
+      streamId: req.params.id,
+    };
+    if (search && field) {
+      where[field] = {
+        [Op.like]: `%${search}%`,
+      };
+    }
+    const data = await models[stream.type.toLowerCase()].findAndCountAll({
+      where,
       include: [
         {
           model: models.user,
@@ -71,10 +50,15 @@ router.get("/:id", async (req, res, next) => {
           attributes: ["name"],
         },
       ],
+      offset: parseInt(offset),
+      limit: parseInt(limit),
+      order: [["createdAt", "DESC"]],
     });
-
     res.status(200).json({ data });
   } catch (error) {
+    if (error instanceof DatabaseError) {
+      error = new BaseError(400, "Invalid field",);
+    }
     next(error);
   }
 });
