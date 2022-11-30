@@ -160,4 +160,5 @@ async function refreshDb() {
     name: "BCOM",
     type: "UG",
   });
+  console.log("Database refreshed!");
 }

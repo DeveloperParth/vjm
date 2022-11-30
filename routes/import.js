@@ -44,7 +44,7 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
 
       record.state ||= "Gujarat";
       record.semester ||= 1;
-      record.physcal_disability ||= "NO";
+      record.physical_disability ||= "NO";
       record.minority ||= "NO";
       record.religion ||= "Hindu";
       record.city ||= "Porbandar";

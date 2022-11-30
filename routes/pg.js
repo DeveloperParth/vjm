@@ -22,6 +22,8 @@ router.post(
     { name: "thalassemia", maxCount: 1 },
     { name: "caste_certificate", maxCount: 1 },
     { name: "all_marksheets", maxCount: 6 },
+    { name: "ph_certificate", maxCount: 1 },
+    { name: "year_certificate", maxCount: 1 },
   ]),
   async (req, res, next) => {
     try {
@@ -261,6 +263,9 @@ router.put(
     { name: "aadhar", maxCount: 1 },
     { name: "thalassemia", maxCount: 1 },
     { name: "caste_certificate", maxCount: 1 },
+    { name: "ph_certificate", maxCount: 1 },
+    { name: "year_certificate", maxCount: 1 },
+    { name: "all_marksheets", maxCount: 1 },
   ]),
   async (req, res, next) => {
     try {

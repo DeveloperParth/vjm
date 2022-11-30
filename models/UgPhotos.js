@@ -16,7 +16,8 @@ module.exports = function (sequelize) {
         "AADHAR",
         "CASTE_CERTIFICATE",
         "THALASSEMIA",
-        "PH_CERTIFICATE"
+        "PH_CERTIFICATE",
+        "YEAR_CERTIFICATE"
       ),
       allowNull: false,
     },

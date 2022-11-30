@@ -3,9 +3,7 @@ const hbs = require("nodemailer-express-handlebars");
 
 const transporter = nodemailer.createTransport({
   // host: "smtp.zoho.in",
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASSWORD,
@@ -74,4 +72,21 @@ function sendDataVerificationMail(email, data, link) {
     }
   );
 }
-module.exports = { sendPasswordMail, sendDataVerificationMail };
+function sendErrorEmail(email, error) {
+  console.log(process.env.MAIL_PASSWORD);
+  transporter.sendMail(
+    {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "Error occured on VJM",
+      html: `<h1>Error occured on VJM</h1>
+      <p>${error}</p>`,
+    },
+    (error, info) => {
+      if (error) {
+        throw error;
+      }
+    }
+  );
+}
+module.exports = { sendPasswordMail, sendDataVerificationMail, sendErrorEmail };

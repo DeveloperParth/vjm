@@ -23,6 +23,7 @@ router.post(
     { name: "thalassemia", maxCount: 1 },
     { name: "caste_certificate", maxCount: 1 },
     { name: "ph_certificate", maxCount: 1 },
+    { name: "year_certificate", maxCount: 1 },
   ]),
   async (req, res, next) => {
     try {
@@ -140,7 +141,7 @@ router.get("/", async (req, res, next) => {
         `%${search.toLowerCase()}%`
       );
     }
-    const data = await models.ug.findAndCountAll({
+    const data = await model.ug.findAndCountAll({
       include: [
         {
           model: models.user,
@@ -221,6 +222,7 @@ router.put(
     { name: "aadhar", maxCount: 1 },
     { name: "thalassemia", maxCount: 1 },
     { name: "caste_certificate", maxCount: 1 },
+    { name: "year_certificate", maxCount: 1 },
   ]),
   async (req, res, next) => {
     try {

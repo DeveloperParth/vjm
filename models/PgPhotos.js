@@ -17,6 +17,7 @@ module.exports = function (sequelize) {
         "CASTE_CERTIFICATE",
         "THALASSEMIA",
         "PH_CERTIFICATE",
+        "YEAR_CERTIFICATE",
         "ALL_MARKSHEETS"
       ),
       allowNull: false,
