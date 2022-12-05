@@ -16,5 +16,13 @@ module.exports = function (sequelize) {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    universityName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    specialNote: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 };

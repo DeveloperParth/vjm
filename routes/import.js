@@ -48,6 +48,7 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
       record.minority ||= "NO";
       record.religion ||= "Hindu";
       record.city ||= "Porbandar";
+      record.district ||= "Porbandar";
       record.streamId = stream.id;
       record.isVerified ||= true;
       return record;
