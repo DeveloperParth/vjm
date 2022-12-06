@@ -37,7 +37,6 @@ router.post("/auth/student/login", async (req, res, next) => {
   try {
     const { email: sid, password } = req.body;
     let type = "ug";
-    12;
 
     if (!(sid && password))
       throw new BaseError(400, "Student ID and password are required");

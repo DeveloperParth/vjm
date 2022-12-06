@@ -163,9 +163,9 @@ router.post(
         pg_college_name,
         pg_university,
       });
-      handleFiles(req, response.id);
+      await handleFiles(req, response.id);
       const token = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
-        expiresIn: "15m",
+        expiresIn: "1d",
       });
       const link = `${process.env.FRONTEND_URL}/pg/verify/${token}`;
       sendDataVerificationMail(req.body.email, response.dataValues, link);
@@ -190,22 +190,7 @@ router.get("/", async (req, res, next) => {
         `%${search.toLowerCase()}%`
       );
     }
-    const data = await models.ug.findAndCountAll({
-      include: [
-        {
-          model: models.user,
-          as: "addedBy",
-          attributes: ["id", "name", "role"],
-        },
-        {
-          model: models.stream,
-          as: "stream",
-          where:
-            search && field === "stream"
-              ? { name: { [Op.like]: `%${search.toUpperCase()}%` } }
-              : {},
-        },
-      ],
+    const data = await models.pg.findAndCountAll({
       where,
       order: [["createdAt", "DESC"]],
       limit: parseInt(limit),
@@ -232,7 +217,15 @@ router.get("/:id", async (req, res, next) => {
     if (!response) throw new BaseError(404, "Not found");
     const data = response.dataValues;
     data.pgPhotos.map((photo) => {
-      data[photo.type.toLowerCase()] = photo;
+      if (photo.type === "ALL_MARKSHEETS") {
+        // create array if not exists and push the photo or push the photo if array exists
+
+        data.all_marksheets = data.all_marksheets
+          ? [...data.all_marksheets, photo.dataValues]
+          : [photo.dataValues];
+      } else {
+        data[photo.type.toLowerCase()] = photo;
+      }
     });
     delete data.pgPhotos;
     res.status(200).json({ data });
@@ -269,7 +262,7 @@ router.put(
   ]),
   async (req, res, next) => {
     try {
-      const isExists = await models.ug.findByPk(req.params.id);
+      const isExists = await models.pg.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
       if (isExists.stream !== req.body.stream) {
         const newpath = path.join(
@@ -282,7 +275,7 @@ router.put(
         );
         fs.renameSync(oldpath, newpath);
       }
-      await models.ug.update(
+      await models.pg.update(
         {
           ...req.body,
           addedBy: res.locals.user.id,
@@ -301,10 +294,10 @@ router.put(
     }
   }
 );
-router.get("/verify/ug/:token", async (req, res, next) => {
+router.get("/verify/pg/:token", async (req, res, next) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
-    await models.ug.update(
+    await models.pg.update(
       {
         isVerified: true,
       },
@@ -314,6 +307,7 @@ router.get("/verify/ug/:token", async (req, res, next) => {
         },
       }
     );
+    res.redirect(process.env.FRONTEND_URL);
   } catch (error) {
     next(error);
   }
@@ -332,16 +326,23 @@ async function handleFiles(req, pgId) {
   if (!fs.existsSync(resolve(userDirPath))) {
     fs.mkdirSync(resolve(userDirPath));
   }
-  req.files.all_marksheet.forEach((file, index) => {
-    const path = checkIfExists(userDirPath, "all_marksheet");
-    fs.renameSync(file.path, resolve(path));
-    models.pgPhotos.create({
-      pgId,
-      type: "all_marksheet",
-      path,
-      isLatest: true,
+  if (req.files.all_marksheets) {
+    await models.pgPhotos.update(
+      { isLatest: false },
+      { where: { pgId, type: "ALL_MARKSHEETS" } }
+    );
+    req.files.all_marksheets.forEach((file, index) => {
+      const path = checkIfExists(userDirPath, `all_marksheet[${index + 1}]`);
+      fs.renameSync(file.path, resolve(path));
+      models.pgPhotos.create({
+        pgId,
+        type: "ALL_MARKSHEETS",
+        path,
+        isLatest: true,
+      });
     });
-  });
+  }
+  delete req.files.all_marksheets;
   for (const fileFieldName in req.files) {
     const file = req.files[fileFieldName][0];
     const oldpath = file.path;
