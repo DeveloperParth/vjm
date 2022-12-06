@@ -3,7 +3,6 @@ const checkAdmin = require("./../middlewares/checkAdmin");
 module.exports = function (app) {
     app.use("/api", require("./auth"));
     app.use("/api", require("./import"));
-    app.use("/seed", require("./seed"));
     app.use("/api/dashboard", require("./dashboard"));
     app.use("/api/tc", require("./tc"));
     app.use("/api/student", require("./student"));
@@ -13,4 +12,10 @@ module.exports = function (app) {
     app.use("/api/stream", require("./stream"));
     app.use("/api/admission/ug", require("./ug"));
     app.use("/api/admission/pg", require("./pg"));
+    app.use("/api/logs", require("./logs"));
+
+
+    app.use("/*", (req, res) => {
+        res.status(404).json({ message: "Endpoint not Found" });
+    });
 }

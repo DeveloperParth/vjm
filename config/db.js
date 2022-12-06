@@ -4,12 +4,17 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialectOptions:
     process.env.NODE_ENV === "production"
       ? {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false,
-          },
-        }
-      : {},
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      }
+      : {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      },
 });
 const modelDefiners = [
   require("../models/Ug"),
@@ -20,6 +25,7 @@ const modelDefiners = [
   require("../models/Stream"),
   require("../models/Bonafide"),
   require("../models/TC"),
+  require("../models/logs"),
 ];
 
 for (const modelDefiner of modelDefiners) {
