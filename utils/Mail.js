@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     // user: "vjmgcs@gmail.com",
     // pass: "vexgyutbrkvmfikq",
     user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASSWORD
+    pass: process.env.MAIL_PASSWORD,
   },
 });
 
@@ -84,6 +84,25 @@ function sendErrorEmail(email, error) {
       subject: "Error occured on VJM",
       html: `<h1>Error occured on VJM</h1>
       <p>${error}</p>`,
+    },
+    (error, info) => {
+      if (error) {
+        throw error;
+      }
+    }
+  );
+}
+function sendPasswordResetMail(email, link) {
+  transporter.sendMail(
+    {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "Password reset",
+      template: "forgot",
+      context: {
+        link,
+        email,
+      },
     },
     (error, info) => {
       if (error) {
