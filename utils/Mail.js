@@ -111,4 +111,9 @@ function sendPasswordResetMail(email, link) {
     }
   );
 }
-module.exports = { sendPasswordMail, sendDataVerificationMail, sendErrorEmail };
+module.exports = {
+  sendPasswordMail,
+  sendDataVerificationMail,
+  sendErrorEmail,
+  sendPasswordResetMail,
+};

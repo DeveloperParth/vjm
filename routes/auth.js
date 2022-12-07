@@ -2,7 +2,7 @@ const router = require("express").Router();
 const BaseError = require("./../utils/BaseError");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendPasswordMail } = require("./../utils/Mail");
+const { sendPasswordMail, sendPasswordResetMail } = require("./../utils/Mail");
 const { models } = require("../config/db");
 const GeneratePassword = require("./../utils/GeneratePassword");
 
@@ -150,7 +150,7 @@ router.post("/auth/change-password", checkStaff, async (req, res, next) => {
     next(error);
   }
 });
-router.post("/forgot", async (req, res, next) => {
+router.post("/auth/forgot", async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await models.user.findOne({ where: { email } });
@@ -161,6 +161,8 @@ router.post("/forgot", async (req, res, next) => {
     user.forgotToken = token;
     await user.save();
     const link = `${process.env.FRONTEND_URL}/forgot/verify/${token}`;
+
+    sendPasswordResetMail(user.email, link);
 
     return res.status(200).json({
       message:
