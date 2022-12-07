@@ -111,9 +111,6 @@ router.post("/user/create", checkAdmin, async (req, res, next) => {
 router.get("/user/staff", async (req, res, next) => {
   try {
     const staff = await models.user.findAll({
-      where: {
-        role: "staff",
-      },
       attributes: ["id", "name", "email", "role"],
     });
     return res.status(200).json({ data: staff });
@@ -154,13 +151,13 @@ router.post("/auth/forgot", async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await models.user.findOne({ where: { email } });
-    if (!user) return res.status(404);
+    if (!user) throw new BaseError(404, "User not found");
     const token = jwt.sign({ id: user.id }, process.env.JWT_VERIFY, {
       expiresIn: "60m",
     });
     user.forgotToken = token;
     await user.save();
-    const link = `${process.env.FRONTEND_URL}/forgot/verify/${token}`;
+    const link = `${process.env.FRONTEND_URL}/forgot/${token}`;
 
     sendPasswordResetMail(user.email, link);
 

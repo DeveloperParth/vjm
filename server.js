@@ -25,15 +25,21 @@ require("./routes")(app);
 
 app.use(ErrorHandler);
 
-// cron.schedule(
-//   "* * * * * *",
-//   () => {
-//     console.log("Running a task every day at 00:00:00");
-//   },
-//   {
-//     scheduled: true,
-//     timezone: "Asia/Kolkata",
-//   }
-// );
+// setup a cron scgedule to run every 5 minutes
+cron.schedule("*/5 * * * *", () => {
+  console.log("running a task every 5 minutes");
+});
+
+// setup a cron scgedule to run every day at 2 am indian time
+cron.schedule(
+  "0 2 * * *",
+  () => {
+    console.log("running a task every day at 2 am");
+  },
+  {
+    scheduled: true,
+    timezone: "Asia/Kolkata",
+  }
+);
 
 app.listen(port, () => console.log("Server runnng"));

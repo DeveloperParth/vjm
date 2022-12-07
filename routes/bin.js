@@ -4,13 +4,13 @@ const { Op, where: Where, fn, col } = require("sequelize");
 const checkAdmin = require("../middlewares/checkAdmin");
 const BaseError = require("../utils/BaseError");
 
-router.get("/:type", checkAdmin, async (req, res, next) => {
+router.get("/:type", async (req, res, next) => {
   try {
     const type = req.params.type;
     if (!(type === "pg" || type === "ug"))
       throw new BaseError(400, "Invalid type of course");
 
-    const { search, field, limit, page } = req.query;
+    const { search, field, limit = 10, page = 1 } = req.query;
     const offset = (page - 1) * limit;
     const where = {
       deletedAt: { [Op.not]: null },
@@ -35,6 +35,7 @@ router.get("/:type", checkAdmin, async (req, res, next) => {
         },
         {
           model: models.tc,
+          required: false,
         },
       ],
       where,
