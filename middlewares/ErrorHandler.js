@@ -6,7 +6,10 @@ module.exports = async (error, req, res, next) => {
     sendErrorEmail("parmarparth996@gmail.com", error);
     sendErrorEmail("rutvik.sanathara1109@gmail.com", error);
     await models.log.create({
-      message: error.message.slice(0, 255)[0],
+      message:
+        error.message.length > 255
+          ? error.message.slice(0, 255)
+          : error.message,
       stack: error.stack,
       path: req.path,
     });

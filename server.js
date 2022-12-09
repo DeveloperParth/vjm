@@ -25,11 +25,6 @@ require("./routes")(app);
 
 app.use(ErrorHandler);
 
-// setup a cron scgedule to run every 5 minutes
-cron.schedule("*/5 * * * *", () => {
-  console.log("running a task every 5 minutes");
-});
-
 // setup a cron scgedule to run every day at 2 am indian time
 cron.schedule(
   "0 2 * * *",
