@@ -289,7 +289,9 @@ router.get("/verify/:token", async (req, res, next) => {
   }
 });
 async function handleFiles(req, ugId) {
-  const userDirName = `${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`;
+  const stream = await models.stream.findByPk(req.body.streamId);
+  if (!stream) throw new BaseError(400);
+  const userDirName = `${stream.name}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`;
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
     const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;

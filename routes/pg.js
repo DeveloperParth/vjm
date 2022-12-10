@@ -323,7 +323,7 @@ router.get("/verify/pg/:token", async (req, res, next) => {
   }
 });
 async function handleFiles(req, pgId) {
-  const userDirName = `${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
+  const userDirName = `${req.body.stream.name}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
     const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
