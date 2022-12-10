@@ -79,7 +79,7 @@ router.post(
         year,
         father_name,
         mother_name,
-        address,
+        address: req.body.address?.replaceAll('"', ""),
         district,
         city,
         pincode,
@@ -248,6 +248,7 @@ router.put(
       await models.ug.update(
         {
           ...req.body,
+          address: req.body.address?.replaceAll('"', ""),
           addedBy: res.locals.user.id,
         },
         {

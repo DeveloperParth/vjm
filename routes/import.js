@@ -45,6 +45,8 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
 
       record.father_mobile = formatNumber(record.father_mobile);
 
+      record.dob = record.dob?.replaceAll("/", "-");
+      record.address = record.address?.replaceAll('"', "");
       record.state ||= "Gujarat";
       record.semester ||= 1;
       record.physical_disability ||= "NO";
