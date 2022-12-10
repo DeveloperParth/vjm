@@ -226,6 +226,13 @@ router.put(
   ]),
   async (req, res, next) => {
     try {
+      Object.keys(req.body).forEach((key) => {
+        if (req.body[key] === "") req.body[key] = null;
+        if (key === "address")
+          req.body[key] = req.body[key]?.replaceAll('"', "");
+        if (req.body[key] === "null") req.body[key] = null;
+        if (req.body[key] === "undefined") req.body[key] = null;
+      });
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
       if (
@@ -248,7 +255,6 @@ router.put(
       await models.ug.update(
         {
           ...req.body,
-          address: req.body.address?.replaceAll('"', ""),
           addedBy: res.locals.user.id,
         },
         {

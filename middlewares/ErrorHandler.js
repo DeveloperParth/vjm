@@ -5,6 +5,7 @@ module.exports = async (error, req, res, next) => {
   if (!(error instanceof BaseError)) {
     sendErrorEmail("parmarparth996@gmail.com", error);
     sendErrorEmail("rutvik.sanathara1109@gmail.com", error);
+    console.log(error);
     await models.log.create({
       message:
         error.message.length > 255

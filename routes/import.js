@@ -55,7 +55,8 @@ router.post("/import/ug", checkStaff, async (req, res, next) => {
       record.city ||= "Porbandar";
       record.district ||= "Porbandar";
       record.streamId = stream.id;
-      record.isVerified ||= true;
+      record.isVerified =
+        record.isVerified.toLowerCase().replaceAll('"', "") || true;
       return record;
     });
     const response = await models.ug.bulkCreate(data, {

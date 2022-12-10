@@ -6,7 +6,7 @@ module.exports = function (sequelize) {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
-        allowNull: true,
+        allowNull: false,
         primaryKey: true,
       },
       name: {
@@ -37,10 +37,6 @@ module.exports = function (sequelize) {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      // stream: {
-      //   type: DataTypes.STRING,
-      //   allowNull: true,
-      // },
       year: {
         type: DataTypes.STRING,
         allowNull: true,

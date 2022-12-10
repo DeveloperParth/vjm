@@ -275,10 +275,19 @@ router.put(
         );
         fs.renameSync(oldpath, newpath);
       }
+      Object.keys(req.body).forEach((key) => {
+        if (req.body[key] === "") req.body[key] = null;
+        if (key === "address")
+          req.body[key] = req.body[key]?.replaceAll('"', "");
+        if (req.body[key] === "null") req.body[key] = null;
+        if (req.body[key] === "undefined") req.body[key] = null;
+      });
       await models.pg.update(
         {
           ...req.body,
           address: req.body.address.replaceAll('"', ""),
+          hsc_attempt:
+            req.body.hsc_attempt === "null" ? null : req.body.hsc_attempt,
           addedBy: res.locals.user.id,
         },
         {
