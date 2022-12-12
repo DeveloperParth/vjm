@@ -28,6 +28,13 @@ router.post(
   async (req, res, next) => {
     try {
       await ugSchema.validateAsync(req.body, { abortEarly: true });
+      const isAadharExist = await models.ug.findOne({
+        where: {
+          aadhar_number: req.body.aadhar_number,
+        },
+      });
+      if (isAadharExist)
+        throw new BaseError(400, "Aadhar Number already exist");
       const {
         name,
         surname,
@@ -158,7 +165,7 @@ router.get("/", async (req, res, next) => {
         },
       ],
       where,
-      order: [["createdAt", "DESC"]],
+      order: [["updatedAt", "DESC"]],
       limit: parseInt(limit),
       offset: parseInt(offset),
     });
@@ -290,6 +297,7 @@ router.get("/verify/:token", async (req, res, next) => {
 });
 async function handleFiles(req, ugId) {
   const stream = await models.stream.findByPk(req.body.streamId);
+  console.log(req.body.streamId, "streamId");
   if (!stream) throw new BaseError(400);
   const userDirName = `${stream.name}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`;
   const userDirPath = `./uploads/${userDirName}`;

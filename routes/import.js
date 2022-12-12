@@ -87,7 +87,7 @@ router.post("/import/ug/:stream", checkStaff, async (req, res, next) => {
     next(error);
   }
 });
-router.post("/import/pg", async (req, res, next) => {
+router.post("/import/pg", checkStaff, async (req, res, next) => {
   try {
     const data = req.body.data;
     const streams = await models.stream.findAll();

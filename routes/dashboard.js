@@ -7,11 +7,7 @@ router.get("/", checkStaff, async (req, res, next) => {
     const year = new Date().getFullYear();
     const ug = await models.ug.count();
     const pg = await models.pg.count();
-    const staff = await models.user.count({
-      where: {
-        role: "STAFF",
-      },
-    });
+    const staff = await models.user.count();
     const streams = [];
     const response = await models.stream.findAll();
     await Promise.all(
