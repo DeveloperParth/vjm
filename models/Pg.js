@@ -10,11 +10,11 @@ module.exports = function (sequelize) {
         primaryKey: true,
       },
       name: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       surname: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       semester: {
@@ -34,15 +34,15 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       year: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       father_name: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       mother_name: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       address: {
@@ -50,31 +50,27 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       district: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       city: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       pincode: {
-        type: DataTypes.STRING(6),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       state: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       whatsapp_mobile: {
-        type: DataTypes.STRING(13),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       father_mobile: {
-        type: DataTypes.STRING(13),
-        allowNull: true,
-      },
-      home_mobile: {
-        type: DataTypes.STRING(13),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       dob: {
@@ -82,27 +78,27 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       gender: {
-        type: DataTypes.ENUM("MALE", "FEMALE"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       birth_place: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       physical_disability: {
-        type: DataTypes.ENUM("YES", "NO"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       disease: {
-        type: DataTypes.ENUM("YES", "NO"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       category: {
-        type: DataTypes.ENUM("GEN", "SEBC", "EBC", "SC", "ST"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       minority: {
-        type: DataTypes.ENUM("YES", "NO"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       religion: {
@@ -118,7 +114,7 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       caste: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       aadhar_number: {
@@ -126,15 +122,15 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       blood_group: {
-        type: DataTypes.ENUM("A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       email: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_stream: {
-        type: DataTypes.ENUM("ARTS", "COMMERCE", "SCIENCE"),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       hsc_seat: {

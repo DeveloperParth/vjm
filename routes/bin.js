@@ -4,7 +4,7 @@ const { Op, where: Where, fn, col } = require("sequelize");
 const checkAdmin = require("../middlewares/checkAdmin");
 const BaseError = require("../utils/BaseError");
 
-router.get("/:type", async (req, res, next) => {
+router.get("/:type", checkAdmin, async (req, res, next) => {
   try {
     const type = req.params.type;
     if (!(type === "pg" || type === "ug"))

@@ -136,7 +136,7 @@ router.post(
   }
 );
 
-router.get("/", async (req, res, next) => {
+router.get("/", checkStaff, async (req, res, next) => {
   try {
     const { page = 1, limit = 10, search, field } = req.query;
     const offset = (page - 1) * limit;
@@ -174,7 +174,29 @@ router.get("/", async (req, res, next) => {
     next(error);
   }
 });
-router.get("/:id", async (req, res, next) => {
+router.get("/all", checkStaff, async (req, res, next) => {
+  try {
+    const data = await models.ug.findAll({
+      include: [
+        {
+          model: models.user,
+          as: "addedBy",
+          attributes: ["id", "name", "role"],
+        },
+        {
+          model: models.stream,
+          as: "stream",
+        },
+      ],
+      order: [["updatedAt", "DESC"]],
+    });
+    res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/:id", checkStaff, async (req, res, next) => {
   try {
     const response = await models.ug.findByPk(req.params.id, {
       include: [
@@ -206,8 +228,15 @@ router.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", checkStaff, async (req, res, next) => {
   try {
+    await models.ug.update({
+      addedById: res.locals.user?.id,
+    }, {
+      where: {
+        id: req.params.id,
+      }
+    })
     await models.ug.destroy({
       where: {
         id: req.params.id,
@@ -262,7 +291,7 @@ router.put(
       await models.ug.update(
         {
           ...req.body,
-          addedBy: res.locals.user.id,
+          addedById: res.locals.user.id,
         },
         {
           where: {

@@ -124,7 +124,7 @@ module.exports = function (sequelize) {
       aadhar_number: {
         type: DataTypes.STRING,
         allowNull: true,
-        unique: true,
+        // unique: true,
       },
       blood_group: {
         type: DataTypes.STRING,

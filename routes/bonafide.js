@@ -8,7 +8,7 @@ const checkStaff = require("./../middlewares/checkStaff");
 
 const BaseError = require("./../utils/BaseError");
 
-router.get("/:type/", async (req, res, next) => {
+router.get("/:type/", checkStaff, async (req, res, next) => {
   try {
     if (!(req.params.type === "ug" || req.params.type === "pg"))
       throw new BaseError(400, `Invalid type '${req.params.type}'`);
@@ -25,10 +25,10 @@ router.get("/:type/", async (req, res, next) => {
           model: models.ug,
           where: query
             ? {
-                name: {
-                  [Op.like]: `%${query}%`,
-                },
-              }
+              name: {
+                [Op.like]: `%${query}%`,
+              },
+            }
             : {},
         },
       ],
