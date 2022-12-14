@@ -32,7 +32,7 @@ router.post(
         name,
         surname,
         semester,
-        stream,
+        streamId,
         year,
         father_name,
         mother_name,
@@ -100,11 +100,11 @@ router.post(
         name,
         surname,
         semester,
-        stream,
+        streamId,
         year,
         father_name,
         mother_name,
-        address: req.body.address?.replaceAll('"', ""),
+        address: address?.replaceAll('"', ""),
         district,
         city,
         pincode,
@@ -248,8 +248,9 @@ router.get("/:id", checkStaff, async (req, res, next) => {
         },
         {
           model: models.stream,
-          as: "stream", d
-        }
+          as: "stream",
+          d,
+        },
       ],
     });
     if (!response) throw new BaseError(404, "Not found");
@@ -280,7 +281,7 @@ router.delete("/:id", checkStaff, async (req, res, next) => {
           id: req.params.id,
         },
       }
-    )
+    );
     await models.pg.destroy({
       where: {
         id: req.params.id,

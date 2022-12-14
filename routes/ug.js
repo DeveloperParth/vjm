@@ -39,7 +39,7 @@ router.post(
         name,
         surname,
         semester,
-        stream,
+        streamId,
         year,
         father_name,
         mother_name,
@@ -82,11 +82,11 @@ router.post(
         name,
         surname,
         semester,
-        stream,
+        streamId,
         year,
         father_name,
         mother_name,
-        address: req.body.address?.replaceAll('"', ""),
+        address: address?.replaceAll('"', ""),
         district,
         city,
         pincode,
@@ -121,10 +121,17 @@ router.post(
         hsc_school_name,
         hsc_school_number,
       });
-      handleFiles(req, response.id);
+      await handleFiles(req, response.id).catch(async (err) => {
+        await models.ug.destroy(
+          { where: { id: response.id } },
+          { paranoid: false }
+        );
+        throw err;
+      });
       const token = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
         expiresIn: "15m",
       });
+
       const link = `${process.env.CLIENT_URL}/ug/verify/${token}`;
       sendDataVerificationMail(req.body.email, response.dataValues, link);
       res.json({ data: response, message: "Submitted" });
@@ -136,7 +143,7 @@ router.post(
   }
 );
 
-router.get("/", checkStaff, async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const { page = 1, limit = 10, search, field } = req.query;
     const offset = (page - 1) * limit;
@@ -165,7 +172,7 @@ router.get("/", checkStaff, async (req, res, next) => {
         },
       ],
       where,
-      order: [["updatedAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit: parseInt(limit),
       offset: parseInt(offset),
     });
@@ -230,13 +237,16 @@ router.get("/:id", checkStaff, async (req, res, next) => {
 });
 router.delete("/:id", checkStaff, async (req, res, next) => {
   try {
-    await models.ug.update({
-      addedById: res.locals.user?.id,
-    }, {
-      where: {
-        id: req.params.id,
+    await models.ug.update(
+      {
+        addedById: res.locals.user?.id,
+      },
+      {
+        where: {
+          id: req.params.id,
+        },
       }
-    })
+    );
     await models.ug.destroy({
       where: {
         id: req.params.id,
@@ -326,8 +336,7 @@ router.get("/verify/:token", async (req, res, next) => {
 });
 async function handleFiles(req, ugId) {
   const stream = await models.stream.findByPk(req.body.streamId);
-  console.log(req.body.streamId, "streamId");
-  if (!stream) throw new BaseError(400);
+  if (!stream) throw new BaseError(404, "Stream not found");
   const userDirName = `${stream.name}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`;
   const userDirPath = `./uploads/${userDirName}`;
   function checkIfExists(userDir, fieldname, iteration = 0) {
