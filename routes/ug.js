@@ -132,7 +132,7 @@ router.post(
         expiresIn: "15m",
       });
 
-      const link = `${process.env.CLIENT_URL}/ug/verify/${token}`;
+      const link = `${process.env.FRONTEND_URl}/ug/verify/${token}`;
       sendDataVerificationMail(req.body.email, response.dataValues, link);
       res.json({ data: response, message: "Submitted" });
     } catch (error) {
