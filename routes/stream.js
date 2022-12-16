@@ -76,6 +76,15 @@ router.post("/", checkAdmin, async (req, res, next) => {
 router.put("/:id", checkAdmin, async (req, res, next) => {
   try {
     const { name, type } = req.body;
+    if (!name) throw new BaseError(400, "Invalid Data")
+    if (type) {
+      const data = await models.stream.findByPk(req.params.id);
+      if (!data) throw new BaseError("Stream not found", 404);
+      const isRecordExists = await models[data.type.toLowerCase()].findOne({
+        where: { streamId: req.params.id },
+      });
+      if (isRecordExists) throw new BaseError(400, "Stream has records");
+    }
     await models.stream.update(
       { name: name.toUpperCase(), type },
       { where: { id: req.params.id } }

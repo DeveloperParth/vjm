@@ -1,5 +1,6 @@
 const express = require("express");
 const cron = require("node-cron");
+const compression = require("compression");
 
 const app = express();
 if (process.env.NODE_ENV !== "production") {
@@ -10,6 +11,7 @@ const ErrorHandler = require("./middlewares/ErrorHandler");
 app.use(require("cors")());
 
 app.use(require("morgan")("dev"));
+app.use(compression());
 const port = process.env.PORT || 3000;
 
 app.use(

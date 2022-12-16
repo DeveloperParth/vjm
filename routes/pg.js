@@ -168,7 +168,9 @@ router.post(
         expiresIn: "1d",
       });
       const link = `${process.env.FRONTEND_URL}/pg/verify/${token}`;
-      sendDataVerificationMail(req.body.email, response.dataValues, link);
+      if (email) {
+        sendDataVerificationMail(req.body.email, response.dataValues, link);
+      }
       res.json({ data: response, message: "Submitted" });
     } catch (error) {
       if (error.isJoi)

@@ -9,7 +9,13 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
             rejectUnauthorized: false,
           },
         }
-      : {},
+      : {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        
+      },
 });
 const modelDefiners = [
   require("../models/Ug"),
