@@ -249,7 +249,6 @@ router.get("/:id", checkStaff, async (req, res, next) => {
         {
           model: models.stream,
           as: "stream",
-          d,
         },
       ],
     });
