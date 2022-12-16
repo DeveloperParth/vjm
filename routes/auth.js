@@ -78,12 +78,28 @@ router.post("/user/create", checkAdmin, async (req, res, next) => {
     const password = GeneratePassword();
     const hashedPassword = bcrypt.hashSync(password, 10);
     const isExists = await models.user.findOne({
-      raw: true,
       where: {
         email,
       },
+      paranoid: false,
     });
-    if (isExists) throw new BaseError(401, "User already exist");
+    if (isExists && !isExists.isSoftDeleted())
+      throw new BaseError(401, "User already exist");
+    if (isExists && isExists.isSoftDeleted()) {
+      isExists.name = name;
+      isExists.role = role.toUpperCase();
+      isExists.password = hashedPassword;
+      const token = jwt.sign({ id: insertResult.id }, process.env.JWT_VERIFY, {
+        expiresIn: "60m",
+      });
+      isExists.forgotToken = token;
+      await isExists.save();
+      const link = `${process.env.FRONTEND_URL}/forgot/${token}`;
+      sendPasswordMail(email, password, link);
+      return res.status(200).json({
+        message: "The account has been created and an email has been sent",
+      });
+    }
     const insertResult = await models.user.create({
       name,
       email,

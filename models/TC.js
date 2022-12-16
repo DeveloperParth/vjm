@@ -13,7 +13,7 @@ module.exports = function (sequelize) {
       allowNull: false,
     },
     examDate: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     universityName: {
@@ -22,7 +22,7 @@ module.exports = function (sequelize) {
     },
     specialNote: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
   });
 };
