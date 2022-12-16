@@ -70,7 +70,7 @@ const pgSchema = joi
     name: joi.string().min(1).max(255).required(),
     surname: joi.string().min(1).max(255).required(),
     streamId: joi.string().required(),
-    email: joi.string().email().optional(),
+    email: joi.string().email().allow("").optional(),
     gender: joi.string().required(),
     dob: joi.string().required(),
     birth_place: joi.string().required(),

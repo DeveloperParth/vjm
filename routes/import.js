@@ -8,15 +8,15 @@ router.post("/import/:type", checkStaff, async (req, res, next) => {
   try {
     const data = req.body.data;
     const streams = await models.stream.findAll();
-    await data.map(async (record, i) => {
+    const ugData = [];
+    const pgData = [];
+    await Promise.all(await data.map(async (record, i) => {
       record.addedById = res.locals.user.id;
       const streamNameToCheckAgainst = (
         record.medium
           ? `${record.stream.replaceAll(".", "")}_${record.medium}`
           : record.stream.replaceAll(".", "")
-      )
-        .toUpperCase()
-        .trim();
+      ).toUpperCase().trim();
       const stream = streams.find((stream) => stream.name === streamNameToCheckAgainst);
       if (!stream)
         throw new BaseError(
@@ -37,7 +37,6 @@ router.post("/import/:type", checkStaff, async (req, res, next) => {
       record.whatsapp_mobile = formatNumber(record.whatsapp_mobile);
 
       record.father_mobile = formatNumber(record.father_mobile);
-
       record.dob = record.dob?.replaceAll("/", "-");
       record.address = record.address?.replaceAll('"', "");
       record.state ||= "Gujarat";
@@ -51,9 +50,28 @@ router.post("/import/:type", checkStaff, async (req, res, next) => {
       record.aadhar_number = record.aadhar_number || null;
       record.isVerified =
         record.isVerified?.toLowerCase()?.replaceAll('"', "") || true;
-      await models[stream.type.toLowerCase()].create(record);
+
+      if (stream.type === "UG") {
+        ugData.push(record);
+      }
+      else if (stream.type === "PG") {
+        pgData.push(record);
+      }
+      else throw new BaseError(400, "Invalid Stream Type");
+
       return record;
-    });
+    }))
+    if (ugData.length) {
+      const response = await models.ug.bulkCreate(ugData, {
+        updateOnDuplicate: Object.keys(models.ug.rawAttributes),
+      });
+    }
+    if (pgData.length) {
+      const response = await models.pg.bulkCreate(pgData, {
+        updateOnDuplicate: Object.keys(models.pg.rawAttributes),
+
+      });
+    }
     const message = "Imported successfully";
     return res.status(200).json({ message });
   } catch (error) {
@@ -86,7 +104,7 @@ router.post("/import/ug/:stream", checkStaff, async (req, res, next) => {
 //       record.addedById = res.locals.user.id;
 //       const streamNameToCheckAgainst = (
 //         record.medium
-//           ? `${record.stream.replaceAll(".", "")}_${record.medium}`
+//           ? `${ record.stream.replaceAll(".", "") }_${ record.medium }`
 //           : record.stream.replaceAll(".", "")
 //       )
 //         .toUpperCase()

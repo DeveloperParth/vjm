@@ -20,11 +20,21 @@ router.get("/", checkStudent, async (req, res, next) => {
           model: models.stream,
           as: "stream",
         },
+        {
+          model: models[type === "ug" ? "ugPhotos" : "phPhotos"],
+
+        }
       ],
     });
-    if (!user) throw new BaseError();
 
-    return res.status(200).json({ data: user.dataValues });
+    if (!user) throw new BaseError();
+    const data = user.dataValues;
+    data.dob = user.dob;
+    data.ugPhotos.map((photo) => {
+      data[photo.type.toLowerCase()] = photo;
+    });
+    delete data.ugPhotos;
+    return res.status(200).json({ data });
   } catch (error) {
     next(error);
   }

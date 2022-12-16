@@ -110,7 +110,7 @@ module.exports = function (sequelize) {
         allowNull: true,
       },
       aadhar_number: {
-        type: DataTypes.STRING(12),
+        type: DataTypes.STRING,
         allowNull: true,
       },
       blood_group: {

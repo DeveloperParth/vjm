@@ -63,6 +63,10 @@ router.post(
         blood_group,
         email,
 
+        sid,
+        enrollment,
+        password,
+
         hsc_stream,
         hsc_seat,
         hsc_passing_year,
@@ -105,6 +109,11 @@ router.post(
         aadhar_number,
         blood_group,
         email,
+
+        sid,
+        enrollment,
+        password: password ? password : generatePassword(aadhar_number, whatsapp_mobile),
+
         addedById: res.locals.user?.id,
         hsc_stream,
         hsc_seat,
@@ -283,8 +292,10 @@ router.put(
       });
       const isExists = await models.ug.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
+      if (isExists.stream.id !== req.body.streamId) {
+        throw new BaseError(400, "Stream cannot be changed");
+      }
       if (
-        isExists.stream !== req.body.stream ||
         isExists.semester !== req.body.semester ||
         isExists.name !== req.body.name ||
         isExists.surname !== req.body.surname ||
@@ -300,6 +311,7 @@ router.put(
         );
         fs.existsSync(oldpath) && fs.renameSync(oldpath, newpath);
       }
+      await handleFiles(req, req.params.id)
       await models.ug.update(
         {
           ...req.body,
@@ -311,7 +323,6 @@ router.put(
           },
         }
       );
-      handleFiles(req, req.params.id);
 
       res.status(200).json({ message: "Successfully updated" });
     } catch (error) {
@@ -332,6 +343,7 @@ router.get("/verify/:token", async (req, res, next) => {
         },
       }
     );
+    return res.redirect(`${process.env.FRONTEND_URL}`);
   } catch (error) {
     next(error);
   }
@@ -375,5 +387,11 @@ async function handleFiles(req, ugId) {
       ugId,
     });
   }
+}
+
+function generatePassword(aadhar_number, whatsapp_mobile) {
+  const aadhar = aadhar_number.slice(-4);
+  const mobile = whatsapp_mobile.slice(-4);
+  return `${aadhar}${mobile}`;
 }
 module.exports = router;

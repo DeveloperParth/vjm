@@ -7,7 +7,7 @@ const { Op, where: Where, fn, col } = require("sequelize");
 const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
 const { sendDataVerificationMail } = require("../utils/Mail");
-const { resolve } = require("path");
+const { resolve, join } = require("path");
 const { pgSchema } = require("../utils/Validation");
 
 router.post(
@@ -28,6 +28,13 @@ router.post(
   async (req, res, next) => {
     try {
       await pgSchema.validateAsync(req.body, { abortEarly: true });
+      const isAadharExist = await models.ug.findOne({
+        where: {
+          aadhar_number: req.body.aadhar_number,
+        },
+      });
+      if (isAadharExist)
+        throw new BaseError(400, "Aadhar Number already exist");
       const {
         name,
         surname,
@@ -55,6 +62,10 @@ router.post(
         aadhar_number,
         blood_group,
         email,
+
+        sid,
+        enrollment,
+        password,
 
         hsc_stream,
         hsc_seat,
@@ -123,6 +134,11 @@ router.post(
         aadhar_number,
         blood_group,
         email,
+
+        sid,
+        enrollment,
+        password: password ? password : generatePassword(aadhar_number, whatsapp_mobile),
+
         addedById: res.locals.user?.id,
         hsc_stream,
         hsc_seat,
@@ -312,16 +328,25 @@ router.put(
     try {
       const isExists = await models.pg.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
-      if (isExists.stream !== req.body.stream) {
-        const newpath = path.join(
+      if (isExists.streamId !== req.body.streamId) {
+        throw new BaseError(400, "Stream cannot be changed");
+      }
+      if (
+
+        isExists.semester !== req.body.semester ||
+        isExists.name !== req.body.name ||
+        isExists.surname !== req.body.surname ||
+        isExists.aadhar_number !== req.body.aadhar_number
+      ) {
+        const newpath = join(
           __dirname,
-          `../uploads/${req.body.stream}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`
+          `../uploads/${req.body.stream}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aaadhar_number}`
         );
-        const oldpath = path.join(
+        const oldpath = join(
           __dirname,
-          `../uploads/${isExists.stream}${isExists.semester}-${isExists.name} ${isExists.surname}-${isExists.whatsapp_mobile}`
+          `../uploads/${isExists.stream}-${isExists.semester}-${isExists.name} ${isExists.surname}-${isExists.aadhar_number}`
         );
-        fs.renameSync(oldpath, newpath);
+        fs.existsSync(oldpath) && fs.renameSync(oldpath, newpath);
       }
       Object.keys(req.body).forEach((key) => {
         if (req.body[key] === "") req.body[key] = null;
@@ -330,6 +355,7 @@ router.put(
         if (req.body[key] === "null") req.body[key] = null;
         if (req.body[key] === "undefined") req.body[key] = null;
       });
+      await handleFiles(req, req.params.id)
       await models.pg.update(
         {
           ...req.body,
@@ -344,7 +370,6 @@ router.put(
           },
         }
       );
-      handleFiles(req, req.params.id);
 
       res.status(200).json({ message: "Successfully updated" });
     } catch (error) {
@@ -426,5 +451,11 @@ async function handleFiles(req, pgId) {
       pgId,
     });
   }
+}
+
+function generatePassword(aadhar_number, whatsapp_mobile) {
+  const aadhar = aadhar_number.slice(-4);
+  const mobile = whatsapp_mobile.slice(-4);
+  return `${aadhar}${mobile}`;
 }
 module.exports = router;
