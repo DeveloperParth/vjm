@@ -3,12 +3,16 @@ const upload = require("../middlewares/Upload");
 const BaseError = require("../utils/BaseError");
 const checkStaff = require("./../middlewares/checkStaff");
 const fs = require("fs");
-const { Op, where: Where, fn, col } = require("sequelize");
+const { where: Where, fn, col } = require("sequelize");
 const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
-const { sendDataVerificationMail } = require("../utils/Mail");
+const {
+  sendDataVerificationMail,
+  sendStudentCreatedMail,
+} = require("../utils/Mail");
 const { resolve, join } = require("path");
 const { pgSchema } = require("../utils/Validation");
+const { generateStudentPassword } = require("../utils/GeneratePassword");
 
 router.post(
   "/",
@@ -137,7 +141,7 @@ router.post(
 
         sid,
         enrollment,
-        password: password ? password : generatePassword(aadhar_number, whatsapp_mobile),
+        password: password || generateStudentPassword(req.body),
 
         addedById: res.locals.user?.id,
         hsc_stream,
@@ -332,7 +336,6 @@ router.put(
         throw new BaseError(400, "Stream cannot be changed");
       }
       if (
-
         isExists.semester !== req.body.semester ||
         isExists.name !== req.body.name ||
         isExists.surname !== req.body.surname ||
@@ -355,7 +358,7 @@ router.put(
         if (req.body[key] === "null") req.body[key] = null;
         if (req.body[key] === "undefined") req.body[key] = null;
       });
-      await handleFiles(req, req.params.id)
+      await handleFiles(req, req.params.id);
       await models.pg.update(
         {
           ...req.body,
@@ -380,7 +383,7 @@ router.put(
 router.get("/verify/pg/:token", async (req, res, next) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
-    await models.pg.update(
+    const data = await models.pg.update(
       {
         isVerified: true,
       },
@@ -390,6 +393,7 @@ router.get("/verify/pg/:token", async (req, res, next) => {
         },
       }
     );
+    sendStudentCreatedMail(data.email);
     res.redirect(process.env.FRONTEND_URL);
   } catch (error) {
     next(error);
@@ -453,9 +457,4 @@ async function handleFiles(req, pgId) {
   }
 }
 
-function generatePassword(aadhar_number, whatsapp_mobile) {
-  const aadhar = aadhar_number.slice(-4);
-  const mobile = whatsapp_mobile.slice(-4);
-  return `${aadhar}${mobile}`;
-}
 module.exports = router;

@@ -5,11 +5,15 @@ const checkStaff = require("../middlewares/checkStaff");
 const fs = require("fs");
 const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
-const { sendDataVerificationMail } = require("../utils/Mail");
+const {
+  sendDataVerificationMail,
+  sendStudentCreatedMail,
+} = require("../utils/Mail");
 const { resolve } = require("path");
 const { ugSchema } = require("../utils/Validation");
 const path = require("path");
 const { Op, where: Where, fn, col } = require("sequelize");
+const { generateStudentPassword } = require("../utils/GeneratePassword");
 
 router.post(
   "/",
@@ -112,8 +116,7 @@ router.post(
 
         sid,
         enrollment,
-        password: password ? password : generatePassword(aadhar_number, whatsapp_mobile),
-
+        password: password || generateStudentPassword(req.body),
         addedById: res.locals.user?.id,
         hsc_stream,
         hsc_seat,
@@ -311,7 +314,7 @@ router.put(
         );
         fs.existsSync(oldpath) && fs.renameSync(oldpath, newpath);
       }
-      await handleFiles(req, req.params.id)
+      await handleFiles(req, req.params.id);
       await models.ug.update(
         {
           ...req.body,
@@ -333,7 +336,7 @@ router.put(
 router.get("/verify/:token", async (req, res, next) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
-    await models.ug.update(
+    const data = await models.ug.update(
       {
         isVerified: true,
       },
@@ -343,6 +346,7 @@ router.get("/verify/:token", async (req, res, next) => {
         },
       }
     );
+    sendStudentCreatedMail(data.email);
     return res.redirect(`${process.env.FRONTEND_URL}`);
   } catch (error) {
     next(error);
@@ -389,9 +393,4 @@ async function handleFiles(req, ugId) {
   }
 }
 
-function generatePassword(aadhar_number, whatsapp_mobile) {
-  const aadhar = aadhar_number.slice(-4);
-  const mobile = whatsapp_mobile.slice(-4);
-  return `${aadhar}${mobile}`;
-}
 module.exports = router;

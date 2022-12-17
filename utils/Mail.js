@@ -111,9 +111,29 @@ function sendPasswordResetMail(email, link) {
     }
   );
 }
+
+function sendStudentCreatedMail(email) {
+  transporter.sendMail(
+    {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "Account verified",
+      template: "student-created",
+      context: {
+        FRONTEND_URL: process.env.FRONTEND_URL,
+      },
+    },
+    (error, info) => {
+      if (error) {
+        throw error;
+      }
+    }
+  );
+}
 module.exports = {
   sendPasswordMail,
   sendDataVerificationMail,
   sendErrorEmail,
   sendPasswordResetMail,
+  sendStudentCreatedMail,
 };

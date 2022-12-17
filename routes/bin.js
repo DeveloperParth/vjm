@@ -55,7 +55,12 @@ router.post("/:type/restore", checkAdmin, async (req, res, next) => {
     const type = req.params.type;
     if (!(type === "pg" || type === "ug"))
       throw new BaseError(400, "Invalid type of course");
-    const data = await models[type].restore();
+    await models[type].restore();
+    await models.tc.destroy({
+      where: {
+        [type === "ug" ? "ugId" : "pgId"]: req.params.id,
+      },
+    });
     return res.status(200).json({ message: "Successfully restored" });
   } catch (error) {
     next(error);
@@ -70,6 +75,11 @@ router.post("/:type/restore/:id", checkAdmin, async (req, res, next) => {
     await models[type].restore({
       where: {
         id: req.params.id,
+      },
+    });
+    await models.tc.destroy({
+      where: {
+        [type === "ug" ? "ugId" : "pgId"]: req.params.id,
       },
     });
     return res.status(200).json({ message: "Successfully restored" });
