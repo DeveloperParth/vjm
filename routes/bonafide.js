@@ -10,8 +10,9 @@ const BaseError = require("./../utils/BaseError");
 
 router.get("/:type/", checkStaff, async (req, res, next) => {
   try {
-    if (!(req.params.type === "ug" || req.params.type === "pg"))
-      throw new BaseError(400, `Invalid type '${req.params.type}'`);
+    const type = req.params.type.toLowerCase();
+    if (!(type === "ug" || type === "pg"))
+      throw new BaseError(400, `Invalid type '${type}'`);
 
     const query = req.query.search;
     const data = await models.bonafide.findAll({
@@ -22,7 +23,7 @@ router.get("/:type/", checkStaff, async (req, res, next) => {
           attributes: ["id", "name", "email"],
         },
         {
-          model: models.ug,
+          model: models[type],
           where: query
             ? {
               name: {

@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sendPasswordMail, sendPasswordResetMail } = require("./../utils/Mail");
 const { models } = require("../config/db");
-const GeneratePassword = require("./../utils/GeneratePassword");
+const { GeneratePassword } = require("./../utils/GeneratePassword");
 
 const checkAdmin = require("./../middlewares/checkAdmin");
 const checkStaff = require("./../middlewares/checkStaff");

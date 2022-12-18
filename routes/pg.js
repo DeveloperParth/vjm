@@ -3,28 +3,35 @@ const upload = require("../middlewares/Upload");
 const BaseError = require("../utils/BaseError");
 const checkStaff = require("./../middlewares/checkStaff");
 const fs = require("fs");
-const { Op, where: Where, fn, col } = require("sequelize");
+const { where: Where, fn, col } = require("sequelize");
 const { models } = require("../config/db");
 const jwt = require("jsonwebtoken");
-const { sendDataVerificationMail } = require("../utils/Mail");
+const {
+  sendDataVerificationMail,
+  sendStudentCreatedMail,
+} = require("../utils/Mail");
 const { resolve, join } = require("path");
 const { pgSchema } = require("../utils/Validation");
+const { generateStudentPassword } = require("../utils/GeneratePassword");
+
+
+const MULTER_FIELDS = [
+  { name: "photo", maxCount: 1 },
+  { name: "lc", maxCount: 1 },
+  { name: "ssc", maxCount: 1 },
+  { name: "hsc", maxCount: 1 },
+  { name: "aadhar", maxCount: 1 },
+  { name: "thalassemia", maxCount: 1 },
+  { name: "caste_certificate", maxCount: 1 },
+  { name: "ph_certificate", maxCount: 1 },
+  { name: "year_certificate", maxCount: 1 },
+  { name: "all_marksheets", maxCount: 10 },
+]
 
 router.post(
   "/",
   checkStaff,
-  upload.fields([
-    { name: "photo", maxCount: 1 },
-    { name: "lc", maxCount: 1 },
-    { name: "ssc", maxCount: 1 },
-    { name: "hsc", maxCount: 1 },
-    { name: "aadhar", maxCount: 1 },
-    { name: "thalassemia", maxCount: 1 },
-    { name: "caste_certificate", maxCount: 1 },
-    { name: "all_marksheets", maxCount: 6 },
-    { name: "ph_certificate", maxCount: 1 },
-    { name: "year_certificate", maxCount: 1 },
-  ]),
+  upload.fields(MULTER_FIELDS),
   async (req, res, next) => {
     try {
       await pgSchema.validateAsync(req.body, { abortEarly: true });
@@ -35,149 +42,13 @@ router.post(
       });
       if (isAadharExist)
         throw new BaseError(400, "Aadhar Number already exist");
-      const {
-        name,
-        surname,
-        semester,
-        streamId,
-        year,
-        father_name,
-        mother_name,
-        address,
-        district,
-        city,
-        pincode,
-        state,
-        whatsapp_mobile,
-        father_mobile,
-        dob,
-        gender,
-        birth_place,
-        disease,
-        physical_disability,
-        category,
-        minority,
-        religion,
-        caste,
-        aadhar_number,
-        blood_group,
-        email,
-
-        sid,
-        enrollment,
-        password,
-
-        hsc_stream,
-        hsc_seat,
-        hsc_passing_year,
-        hsc_month,
-        hsc_attempt,
-        hsc_total,
-        hsc_obtained,
-        hsc_percentage,
-        hsc_percentile,
-        hsc_grade,
-        hsc_board,
-        hsc_center,
-        hsc_school_name,
-        hsc_school_number,
-
-        ug_degree,
-        ug_stream,
-        ug_seat,
-        ug_passing_year,
-        ug_month,
-        ug_attempt,
-        ug_total,
-        ug_obtained,
-        ug_percentage,
-        ug_college_name,
-        ug_university,
-
-        pg_degree,
-        pg_stream,
-        pg_seat,
-        pg_passing_year,
-        pg_month,
-        pg_attempt,
-        pg_total,
-        pg_obtained,
-        pg_percentage,
-        pg_college_name,
-        pg_university,
-      } = req.body;
+      const { address, email, password } = req.body;
 
       const response = await models.pg.create({
-        name,
-        surname,
-        semester,
-        streamId,
-        year,
-        father_name,
-        mother_name,
         address: address?.replaceAll('"', ""),
-        district,
-        city,
-        pincode,
-        state,
-        whatsapp_mobile,
-        father_mobile,
-        dob,
-        gender,
-        birth_place,
-        disease,
-        physical_disability,
-        category,
-        minority,
-        religion,
-        caste,
-        aadhar_number,
-        blood_group,
-        email,
-
-        sid,
-        enrollment,
-        password: password ? password : generatePassword(aadhar_number, whatsapp_mobile),
-
+        password: password || generateStudentPassword(req.body),
         addedById: res.locals.user?.id,
-        hsc_stream,
-        hsc_seat,
-        hsc_passing_year,
-        hsc_month,
-        hsc_attempt,
-        hsc_total,
-        hsc_obtained,
-        hsc_percentage,
-        hsc_percentile,
-        hsc_grade,
-        hsc_board,
-        hsc_center,
-        hsc_school_name,
-        hsc_school_number,
-
-        ug_degree,
-        ug_stream,
-        ug_seat,
-        ug_passing_year,
-        ug_month,
-        ug_attempt,
-        ug_total,
-        ug_obtained,
-        ug_percentage,
-        ug_college_name,
-        ug_university,
-
-        pg_degree,
-        pg_stream,
-        pg_seat,
-        pg_passing_year,
-        pg_month,
-        pg_attempt,
-        pg_total,
-        pg_obtained,
-        pg_percentage,
-        pg_college_name,
-        pg_university,
+        ...req.body,
       });
       await handleFiles(req, response.id);
       const token = jwt.sign({ id: response.id }, process.env.JWT_VERIFY, {
@@ -312,18 +183,7 @@ router.delete("/:id", checkStaff, async (req, res, next) => {
 router.put(
   "/:id",
   checkStaff,
-  upload.fields([
-    { name: "photo", maxCount: 1 },
-    { name: "lc", maxCount: 1 },
-    { name: "ssc", maxCount: 1 },
-    { name: "hsc", maxCount: 1 },
-    { name: "aadhar", maxCount: 1 },
-    { name: "thalassemia", maxCount: 1 },
-    { name: "caste_certificate", maxCount: 1 },
-    { name: "ph_certificate", maxCount: 1 },
-    { name: "year_certificate", maxCount: 1 },
-    { name: "all_marksheets", maxCount: 1 },
-  ]),
+  upload.fields(MULTER_FIELDS),
   async (req, res, next) => {
     try {
       const isExists = await models.pg.findByPk(req.params.id);
@@ -334,7 +194,6 @@ router.put(
         if (newStreamToUpdate.type !== isExists.stream.type) throw new BaseError(400, "Stream type cannot be changed")
       }
       if (
-
         isExists.semester !== req.body.semester ||
         isExists.name !== req.body.name ||
         isExists.surname !== req.body.surname ||
@@ -357,7 +216,7 @@ router.put(
         if (req.body[key] === "null") req.body[key] = null;
         if (req.body[key] === "undefined") req.body[key] = null;
       });
-      await handleFiles(req, req.params.id)
+      await handleFiles(req, req.params.id);
       await models.pg.update(
         {
           ...req.body,
@@ -382,7 +241,7 @@ router.put(
 router.get("/verify/pg/:token", async (req, res, next) => {
   try {
     const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
-    await models.pg.update(
+    const data = await models.pg.update(
       {
         isVerified: true,
       },
@@ -392,6 +251,7 @@ router.get("/verify/pg/:token", async (req, res, next) => {
         },
       }
     );
+    sendStudentCreatedMail(data.email);
     res.redirect(process.env.FRONTEND_URL);
   } catch (error) {
     next(error);
@@ -431,6 +291,7 @@ async function handleFiles(req, pgId) {
   }
   delete req.files.all_marksheets;
   for (const fileFieldName in req.files) {
+    console.log(fileFieldName);
     const file = req.files[fileFieldName][0];
     const oldpath = file.path;
     const path = checkIfExists(userDirPath, fileFieldName);
@@ -455,9 +316,4 @@ async function handleFiles(req, pgId) {
   }
 }
 
-function generatePassword(aadhar_number, whatsapp_mobile) {
-  const aadhar = aadhar_number.slice(-4);
-  const mobile = whatsapp_mobile.slice(-4);
-  return `${aadhar}${mobile}`;
-}
 module.exports = router;

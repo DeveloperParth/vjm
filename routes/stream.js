@@ -47,7 +47,7 @@ router.get("/:id/data", async (req, res, next) => {
         },
         {
           model: models.stream,
-          attributes: ["name"],
+          as: "stream",
         },
       ],
       offset: parseInt(offset),
@@ -57,8 +57,34 @@ router.get("/:id/data", async (req, res, next) => {
     res.status(200).json({ data });
   } catch (error) {
     if (error instanceof DatabaseError) {
-      error = new BaseError(400, "Invalid field",);
+      error = new BaseError(400, "Invalid field");
     }
+    next(error);
+  }
+});
+router.get("/:id/all", async (req, res, next) => {
+  try {
+    const stream = await models.stream.findByPk(req.params.id);
+    if (!stream) throw new BaseError(400, "Invalid Stream");
+    const data = await models[stream.type.toLowerCase()].findAll({
+      where: {
+        streamId: req.params.id,
+      },
+      include: [
+        {
+          model: models.user,
+          as: "addedBy",
+          attributes: ["id", "name", "role"],
+        },
+        {
+          model: models.stream,
+          as: "stream",
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+    res.status(200).json({ data });
+  } catch (error) {
     next(error);
   }
 });

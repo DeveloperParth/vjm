@@ -22,7 +22,7 @@ module.exports = function (sequelize) {
     },
     specialNote: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   });
 };

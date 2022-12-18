@@ -9,5 +9,16 @@ function genPassword() {
   }
   return password;
 }
+function generateStudentPassword(record) {
+  const { aadhar_number, name, whatsapp_mobile } = record;
+  let password = "";
+  if (aadhar_number) {
+    password = `${aadhar_number.slice(-8)}`;
+    return password;
+  } else {
+    password = "12345678";
+    return password;
+  }
+}
 
-module.exports = genPassword;
+module.exports = { genPassword, generateStudentPassword };

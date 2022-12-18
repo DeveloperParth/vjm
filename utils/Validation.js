@@ -145,7 +145,7 @@ const tcSchema = joi
     seatNo: joi.string().required(),
     examDate: joi.string().required(),
     universityName: joi.string().required(),
-    specialNote: joi.string().optional(),
+    specialNote: joi.string().allow("").optional(),
   })
   .options({ allowUnknown: true });
 module.exports = { ugSchema, pgSchema, tcSchema };

@@ -16,6 +16,7 @@ router.post("/:type/:id", checkStaff, async (req, res, next) => {
       examDate: req.body.examDate,
       addedById: res.locals.user.id,
       universityName: req.body.universityName,
+      specialNote: req.body.specialNote,
     });
     await models[req.params.type].destroy({
       where: {
