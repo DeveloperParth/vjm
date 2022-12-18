@@ -328,8 +328,10 @@ router.put(
     try {
       const isExists = await models.pg.findByPk(req.params.id);
       if (!isExists) throw new BaseError(404, "Not found");
-      if (isExists.streamId !== req.body.streamId) {
-        throw new BaseError(400, "Stream cannot be changed");
+      if (isExists.stream.id !== req.body.streamId) {
+        const newStreamToUpdate = await models.stream.findByPk(req.body.streamId);
+        if (!newStreamToUpdate) throw new BaseError(404, "The stream to update not found");
+        if (newStreamToUpdate.type !== isExists.stream.type) throw new BaseError(400, "Stream type cannot be changed")
       }
       if (
 

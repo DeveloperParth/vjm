@@ -11,20 +11,23 @@ const { ugSchema } = require("../utils/Validation");
 const path = require("path");
 const { Op, where: Where, fn, col } = require("sequelize");
 
+
+const MULTER_FIELDS = [
+  { name: "photo", maxCount: 1 },
+  { name: "lc", maxCount: 1 },
+  { name: "ssc", maxCount: 1 },
+  { name: "hsc", maxCount: 1 },
+  { name: "aadhar", maxCount: 1 },
+  { name: "thalassemia", maxCount: 1 },
+  { name: "caste_certificate", maxCount: 1 },
+  { name: "ph_certificate", maxCount: 1 },
+  { name: "year_certificate", maxCount: 1 },
+]
+
 router.post(
   "/",
   checkStaff,
-  upload.fields([
-    { name: "photo", maxCount: 1 },
-    { name: "lc", maxCount: 1 },
-    { name: "ssc", maxCount: 1 },
-    { name: "hsc", maxCount: 1 },
-    { name: "aadhar", maxCount: 1 },
-    { name: "thalassemia", maxCount: 1 },
-    { name: "caste_certificate", maxCount: 1 },
-    { name: "ph_certificate", maxCount: 1 },
-    { name: "year_certificate", maxCount: 1 },
-  ]),
+  upload.fields(MULTER_FIELDS),
   async (req, res, next) => {
     try {
       await ugSchema.validateAsync(req.body, { abortEarly: true });
@@ -271,16 +274,7 @@ router.delete("/:id", checkStaff, async (req, res, next) => {
 router.put(
   "/:id",
   checkStaff,
-  upload.fields([
-    { name: "photo", maxCount: 1 },
-    { name: "lc", maxCount: 1 },
-    { name: "ssc", maxCount: 1 },
-    { name: "hsc", maxCount: 1 },
-    { name: "aadhar", maxCount: 1 },
-    { name: "thalassemia", maxCount: 1 },
-    { name: "caste_certificate", maxCount: 1 },
-    { name: "year_certificate", maxCount: 1 },
-  ]),
+  upload.fields(MULTER_FIELDS),
   async (req, res, next) => {
     try {
       Object.keys(req.body).forEach((key) => {
@@ -290,10 +284,12 @@ router.put(
         if (req.body[key] === "null") req.body[key] = null;
         if (req.body[key] === "undefined") req.body[key] = null;
       });
-      const isExists = await models.ug.findByPk(req.params.id);
+      const isExists = await models.ug.findByPk(req.params.id, { include: [{ model: models.stream, as: "stream" }] });
       if (!isExists) throw new BaseError(404, "Not found");
       if (isExists.stream.id !== req.body.streamId) {
-        throw new BaseError(400, "Stream cannot be changed");
+        const newStreamToUpdate = await models.stream.findByPk(req.body.streamId);
+        if (!newStreamToUpdate) throw new BaseError(404, "The stream to update not found");
+        if (newStreamToUpdate.type !== isExists.stream.type) throw new BaseError(400, "Stream type cannot be changed")
       }
       if (
         isExists.semester !== req.body.semester ||
