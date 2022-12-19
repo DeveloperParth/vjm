@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { sendPasswordMail, sendPasswordResetMail } = require("./../utils/Mail");
 const { models } = require("../config/db");
-const { GeneratePassword } = require("./../utils/GeneratePassword");
+const { genPassword } = require("./../utils/GeneratePassword");
 
 const checkAdmin = require("./../middlewares/checkAdmin");
 const checkStaff = require("./../middlewares/checkStaff");
@@ -75,7 +75,7 @@ router.post("/user/create", checkAdmin, async (req, res, next) => {
     if (!email || !name || !role)
       throw new BaseError(400, "Email, name and role is required");
 
-    const password = GeneratePassword();
+    const password = genPassword();
     const hashedPassword = bcrypt.hashSync(password, 10);
     const isExists = await models.user.findOne({
       where: {
