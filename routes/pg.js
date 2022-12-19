@@ -13,6 +13,7 @@ const {
 const { resolve, join } = require("path");
 const { pgSchema } = require("../utils/Validation");
 const { generateStudentPassword } = require("../utils/GeneratePassword");
+const { MulterError } = require("multer");
 
 
 const MULTER_FIELDS = [
@@ -62,6 +63,9 @@ router.post(
     } catch (error) {
       if (error.isJoi)
         return next(new BaseError(400, error.message.replace(/"/g, "'")));
+      if (error instanceof MulterError && error.code === "LIMIT_UNEXPECTED_FILE") {
+        return next(new BaseError(400, "Only 10 maximum files are allowed"))
+      }
       next(error);
     }
   }
@@ -186,7 +190,7 @@ router.put(
   upload.fields(MULTER_FIELDS),
   async (req, res, next) => {
     try {
-      const isExists = await models.pg.findByPk(req.params.id);
+      const isExists = await models.pg.findByPk(req.params.id, { include: [{ model: models.stream, as: "stream" }] });
       if (!isExists) throw new BaseError(404, "Not found");
       if (isExists.stream.id !== req.body.streamId) {
         const newStreamToUpdate = await models.stream.findByPk(req.body.streamId);
@@ -234,6 +238,9 @@ router.put(
 
       res.status(200).json({ message: "Successfully updated" });
     } catch (error) {
+      if (error instanceof MulterError && error.code === "LIMIT_UNEXPECTED_FILE") {
+        return next(new BaseError(400, "Only 10 maximum files are allowed"))
+      }
       next(error);
     }
   }
@@ -262,16 +269,26 @@ async function handleFiles(req, pgId) {
   if (!stream) throw new BaseError(404, "Stream not found");
   const userDirName = `${stream.name}${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.whatsapp_mobile}`;
   const userDirPath = `./uploads/${userDirName}`;
-  function checkIfExists(userDir, fieldname, iteration = 0) {
-    const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
-    if (fs.existsSync(resolve(path))) {
-      return checkIfExists(userDir, fieldname, iteration + 1);
-    }
-    return path;
-  }
+
 
   if (!fs.existsSync(resolve(userDirPath))) {
     fs.mkdirSync(resolve(userDirPath));
+  }
+  if (req.body.deletePhotosArray) {
+    console.log(req.body.deletePhotosArray);
+    const deletePhotosArray = JSON.parse(req.body.deletePhotosArray);
+    await Promise.all(
+      deletePhotosArray.map(async (fieldnameToDelete) => {
+        await models.pgPhotos.update({
+          isLatest: false,
+        }, {
+          where: {
+            type: fieldnameToDelete,
+            pgId,
+          }
+        })
+      })
+    )
   }
   if (req.files.all_marksheets) {
     await models.pgPhotos.update(
@@ -314,6 +331,13 @@ async function handleFiles(req, pgId) {
       pgId,
     });
   }
+}
+function checkIfExists(userDir, fieldname, iteration = 0) {
+  const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
+  if (fs.existsSync(resolve(path))) {
+    return checkIfExists(userDir, fieldname, iteration + 1);
+  }
+  return path;
 }
 
 module.exports = router;

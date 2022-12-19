@@ -3,7 +3,7 @@ const BaseError = require("./../utils/BaseError");
 const { models } = require("../config/db");
 module.exports = async (error, req, res, next) => {
   console.log(error);
-  if (!(error instanceof BaseError)) {
+  if (!(error instanceof BaseError || error.isJoi)) {
     sendErrorEmail("parmarparth996@gmail.com", error);
     sendErrorEmail("rutvik.sanathara1109@gmail.com", error);
     await models.log.create({

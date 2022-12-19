@@ -266,16 +266,24 @@ async function handleFiles(req, ugId) {
   if (!stream) throw new BaseError(404, "Stream not found");
   const userDirName = `${stream.name}-${req.body.semester}-${req.body.name} ${req.body.surname}-${req.body.aadhar_number}`;
   const userDirPath = `./uploads/${userDirName}`;
-  function checkIfExists(userDir, fieldname, iteration = 0) {
-    const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
-    if (fs.existsSync(resolve(path))) {
-      return checkIfExists(userDir, fieldname, iteration + 1);
-    }
-    return path;
-  }
-
   if (!fs.existsSync(resolve(userDirPath))) {
     fs.mkdirSync(resolve(userDirPath));
+  }
+  if (req.body.deletePhotosArray) {
+    console.log(req.body.deletePhotosArray);
+    const deletePhotosArray = JSON.parse(req.body.deletePhotosArray);
+    await Promise.all(
+      deletePhotosArray.map(async (fieldnameToDelete) => {
+        await models.ugPhotos.update({
+          isLatest: false,
+        }, {
+          where: {
+            type: fieldnameToDelete,
+            ugId,
+          }
+        })
+      })
+    )
   }
   for (const fileFieldName in req.files) {
     const file = req.files[fileFieldName][0];
@@ -301,5 +309,11 @@ async function handleFiles(req, ugId) {
     });
   }
 }
-
+function checkIfExists(userDir, fieldname, iteration = 0) {
+  const path = `${userDir}/${fieldname}${iteration || ""}.jpg`;
+  if (fs.existsSync(resolve(path))) {
+    return checkIfExists(userDir, fieldname, iteration + 1);
+  }
+  return path;
+}
 module.exports = router;
