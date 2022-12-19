@@ -191,8 +191,8 @@ router.post("/forgot/:token", async (req, res, next) => {
     const decoded = jwt.verify(req.params.token, process.env.JWT_VERIFY);
 
     const user = await models.user.findByPk(decoded.id);
-    if (!user) throw new BaseError();
-    if (user.forgotToken !== req.params.token) throw new BaseError();
+    if (!user) throw new BaseError(404, "User not found");
+    if (user.forgotToken !== req.params.token) throw new BaseError(401, "Link expired");
     user.password = bcrypt.hashSync(password, 10);
     user.forgotToken = null;
     const updatedUser = await user.save();
