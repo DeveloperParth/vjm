@@ -275,8 +275,8 @@ async function handleFiles(req, pgId) {
     fs.mkdirSync(resolve(userDirPath));
   }
   if (req.body.deletePhotosArray) {
-    console.log(req.body.deletePhotosArray);
     const deletePhotosArray = JSON.parse(req.body.deletePhotosArray);
+
     await Promise.all(
       deletePhotosArray.map(async (fieldnameToDelete) => {
         await models.pgPhotos.update({
@@ -290,15 +290,35 @@ async function handleFiles(req, pgId) {
       })
     )
   }
+  if (req.body.deleteAllMarksheetsArray) {
+    const all_marksheets = JSON.parse(req.body.deleteAllMarksheetsArray);
+    console.log("🚀 ~ file: pg.js:283 ~ handleFiles ~ all_marksheets", all_marksheets)
+    await Promise.all(
+      all_marksheets.map(async (idToDelete) => {
+        await models.pgPhotos.destroy({
+          where: {
+            id: idToDelete,
+            type: "ALL_MARKSHEETS",
+            pgId,
+          }
+        }
+        )
+      })
+    )
+
+  }
   if (req.files.all_marksheets) {
     await models.pgPhotos.update(
       { isLatest: false },
       { where: { pgId, type: "ALL_MARKSHEETS" } }
     );
-    req.files.all_marksheets.forEach((file, index) => {
+    req.files.all_marksheets.forEach(async (file, index) => {
       const path = checkIfExists(userDirPath, `all_marksheet[${index + 1}]`);
-      fs.renameSync(file.path, resolve(path));
-      models.pgPhotos.create({
+      if (fs.existsSync(resolve(file.path))) {
+        fs.renameSync(resolve(file.path), resolve(path));
+
+      }
+      await models.pgPhotos.create({
         pgId,
         type: "ALL_MARKSHEETS",
         path,
